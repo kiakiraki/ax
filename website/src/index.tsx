@@ -317,6 +317,12 @@ ax time now --tz America/New_York`}</pre>
         </p>
         <div class='steps'>
           <div class='step'>
+            <span class='n'>$</span>
+            <span class='what'>playbook</span>
+            <code>ax agent-context</code>
+            <button data-copy='ax agent-context'>copy</button>
+          </div>
+          <div class='step'>
             <span class='n'>+</span>
             <span class='what'>add skill</span>
             <code>npx skills add yusukebe/ax</code>
