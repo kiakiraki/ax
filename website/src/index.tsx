@@ -94,6 +94,8 @@ box-shadow:0 4px 0 var(--shadow);transition:.15s}
 .files a span{color:var(--acc);font-weight:700}
 .bottom{max-width:960px;margin:0 auto;padding:10px 36px 56px;display:flex;align-items:center;
 justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--soft)}
+.bottom a{text-decoration:underline;text-underline-offset:3px}
+.bottom a:hover{color:var(--acc)}
 @media(max-width:760px){
 .mascot{position:static;font-size:72px;display:block;margin-bottom:10px}
 .duel{grid-template-columns:1fr}
@@ -300,7 +302,9 @@ ax time now --tz America/New_York`}</pre>
       </section>
 
       <footer class='bottom'>
-        <div>© {new Date().getFullYear()} Yusuke Wada — MIT</div>
+        <div>
+          © {new Date().getFullYear()} <a href='https://github.com/yusukebe'>Yusuke Wada</a> — MIT
+        </div>
       </footer>
 
       <script dangerouslySetInnerHTML={{ __html: js }} />
