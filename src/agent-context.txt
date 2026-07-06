@@ -7,7 +7,7 @@
 > lines, capped by default to stay token-cheap.
 
 Install: curl -fsSL https://ax.yusuke.run/install | sh
-Agent skill (Claude Code): https://ax.yusuke.run/skill.md
+Agent skill: npx skills add yusukebe/ax
 Source: https://github.com/yusukebe/ax
 
 ## Conventions

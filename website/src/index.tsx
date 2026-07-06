@@ -96,13 +96,8 @@ border:2px solid var(--line);border-radius:16px}
 letter-spacing:.08em;text-transform:uppercase}
 .install code{font-size:13.5px;overflow-x:auto;white-space:nowrap}
 .install code::before{content:'$ ';color:var(--acc);font-weight:700}
-.agents p{max-width:640px;font-size:15px;color:#6b5a4c}
-.agents .files{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
-.files a{display:inline-flex;gap:8px;border-radius:999px;padding:11px 18px;font-size:13px;
-font-family:var(--mono);background:var(--card);border:2px solid var(--line);
-box-shadow:0 4px 0 var(--shadow);transition:.15s}
-.files a:hover{transform:translateY(2px);box-shadow:0 1px 0 var(--shadow)}
-.files a span{color:var(--acc);font-weight:700}
+.agents p{max-width:640px;font-size:15px;color:#6b5a4c;margin-bottom:24px}
+.agents .steps{max-width:520px}
 .bottom{max-width:1080px;margin:0 auto;padding:10px 36px 56px;display:flex;align-items:center;
 justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--soft)}
 .bottom a{text-decoration:underline;text-underline-offset:3px}
@@ -313,15 +308,20 @@ ax time now --tz America/New_York`}</pre>
         <p>
           Output is capped by default (never silently). Errors are one structured line with a hint.
           <code> --help</code> costs a few dozen tokens, and <code>ax agent-context</code> prints
-          the whole playbook offline. Your agent can also learn ax from two fetchable files:
+          the whole playbook offline. Install the skill to make your agent reach for ax on its own —
+          works with Claude Code, Cursor, Codex, and 20+ agents via{' '}
+          <a href='https://www.skills.sh/' style='text-decoration:underline'>
+            skills.sh
+          </a>
+          :
         </p>
-        <div class='files'>
-          <a href='/llms.txt'>
-            <span>GET</span> /llms.txt — full reference for any agent
-          </a>
-          <a href='/skill.md'>
-            <span>GET</span> /skill.md — a Claude Code skill, ready to drop in
-          </a>
+        <div class='steps'>
+          <div class='step'>
+            <span class='n'>+</span>
+            <span class='what'>add skill</span>
+            <code>npx skills add yusukebe/ax</code>
+            <button data-copy='npx skills add yusukebe/ax'>copy</button>
+          </div>
         </div>
       </section>
 
