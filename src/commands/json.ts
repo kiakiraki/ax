@@ -17,18 +17,26 @@ path:
   .items[].name    member of every element
 
 options:
+  --shape          compact structural summary (never cat a big file again)
   --where <expr>   filter an array result: price > 100 && name ~ /^foo/i
                    (operators: == != > >= < <= ~ !~ && || ! — no eval)
+  --pick <a,b>     project each row to these fields (one field → bare value)
+  --freq           frequency table of the (picked) values (uniq -c, sorted)
+  --tsv            uniform rows as TSV: header once, then values (token-cheap)
   --keys           list the keys of the result (object) or indices (array)
   --len            print the length/size of the result
   --raw            print scalar results as bare lines (not JSON)
   --limit <n>      cap array results (default 50)
+  --budget <t>     cap output to ~t tokens
   --all            no cap
 
+one call answers a question — filter + project + aggregate:
+  ax json users.json '.users[]' --where 'active == true && age > 40' --pick country --freq
+
 examples:
+  ax json data.json --shape
   ax json data.json '.items[].name' --raw
-  ax json api.json '.data.users[0]'
-  ax json data.json '.items[]' --where 'price > 100 && stock != 0'
+  ax json data.json '.items[]' --where 'price > 100' --pick name,price --tsv
   cat x.json | ax json - --keys`
 
 export async function json(argv: string[]) {

@@ -58,17 +58,98 @@ export function runQuery(root: unknown, path: string | undefined): unknown {
   return stream.length === 1 ? stream[0] : stream
 }
 
-// Shared output handling for the query commands (--keys / --len / --raw).
+// --shape: compact structural summary so an agent never has to cat the file.
+function shapeOf(v: unknown, depth = 0): string {
+  const t = typeOf(v)
+  if (t === 'array') {
+    const arr = v as unknown[]
+    if (arr.length === 0) return 'array(0)'
+    return `array(${arr.length}) of ${shapeOf(arr[0], depth + 1)}`
+  }
+  if (t === 'object') {
+    if (depth > 3) return 'object'
+    const entries = Object.entries(v as Record<string, unknown>)
+    const shown = entries.slice(0, 12)
+    const body = shown.map(([k, val]) => `${k}: ${shapeOf(val, depth + 1)}`).join(', ')
+    const more = entries.length > shown.length ? `, …+${entries.length - shown.length}` : ''
+    return `{${body}${more}}`
+  }
+  if (t === 'string') {
+    const s = v as string
+    return s.length > 24 ? `string("${s.slice(0, 21)}…")` : `string("${s}")`
+  }
+  return t
+}
+
+// Project each row down to the picked fields (--pick 'a,b,c').
+function pick(result: unknown, spec: string): unknown {
+  const fields = spec
+    .split(',')
+    .map((f) => f.trim())
+    .filter(Boolean)
+  const project = (row: unknown) => {
+    if (typeOf(row) !== 'object') return row
+    const r = row as Record<string, unknown>
+    if (fields.length === 1) return r[fields[0]!] ?? null
+    return Object.fromEntries(fields.map((f) => [f, r[f] ?? null]))
+  }
+  return Array.isArray(result) ? result.map(project) : project(result)
+}
+
+// TSV for uniform rows: keys once in a header, values per line. Token-cheap
+// and pipeable into awk/sort.
+export function toTsv(result: unknown): string[] {
+  const arr = Array.isArray(result) ? result : [result]
+  if (arr.length === 0) return []
+  const cell = (v: unknown) =>
+    v === null || v === undefined
+      ? ''
+      : typeOf(v) === 'object' || Array.isArray(v)
+        ? JSON.stringify(v)
+        : String(v)
+  if (typeOf(arr[0]) !== 'object') return arr.map(cell)
+  const headers = Object.keys(arr[0] as object)
+  return [
+    headers.join('\t'),
+    ...arr.map((row) => headers.map((h) => cell((row as Record<string, unknown>)[h])).join('\t')),
+  ]
+}
+
+// Shared output handling for the query commands.
 export function emitQueryResult(
   result: unknown,
   flags: Record<string, string | boolean | undefined>
 ) {
-  const opts = { limit: num(flags.limit, 50), all: flags.all === true }
+  const opts = {
+    limit: num(flags.limit, 50),
+    all: flags.all === true,
+    budget: num(flags.budget, 0),
+  }
+
+  if (flags.shape) return void process.stdout.write(shapeOf(result) + '\n')
 
   if (typeof flags.where === 'string') {
     if (!Array.isArray(result)) fail('--where needs an array result', 'iterate with [] first')
     result = result.filter(compileWhere(flags.where))
   }
+
+  if (typeof flags.pick === 'string') result = pick(result, flags.pick)
+
+  // --freq: frequency table of the (picked) values — sort | uniq -c | sort -rn.
+  if (flags.freq) {
+    const arr = Array.isArray(result) ? result : [result]
+    const counts = new Map<string, number>()
+    for (const v of arr) {
+      const key = typeOf(v) === 'object' || Array.isArray(v) ? JSON.stringify(v) : String(v)
+      counts.set(key, (counts.get(key) ?? 0) + 1)
+    }
+    const lines = [...counts.entries()]
+      .sort((x, y) => y[1] - x[1])
+      .map(([v, n]) => `${String(n).padStart(7)}  ${v}`)
+    return emitLines(lines, opts)
+  }
+
+  if (flags.tsv) return emitLines(toTsv(result), opts)
 
   if (flags.keys) {
     const keys = Array.isArray(result)
@@ -107,6 +188,11 @@ export const queryFlagDefs = {
   raw: { type: 'boolean' },
   all: { type: 'boolean' },
   help: { type: 'boolean' },
+  shape: { type: 'boolean' },
+  freq: { type: 'boolean' },
+  tsv: { type: 'boolean' },
   limit: { type: 'string' },
   where: { type: 'string' },
+  pick: { type: 'string' },
+  budget: { type: 'string' },
 } as const

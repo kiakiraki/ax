@@ -32,20 +32,22 @@ cheaper to write, cheaper to read back, and does not break on markup shifts.
 ## Command cheatsheet
 
 ```sh
-ax html page.html '.item a' --attr href          # attribute per match
+ax json api.json --shape                         # structure in one line — never cat a big file
+ax json api.json '.users[]' --where 'active == true && age > 40' --pick country --freq
+ax json data.json '.items[]' --pick name,price --tsv   # token-cheap rows
 ax html page.html '.item' --row 'title=a, href=a@href, id=@data-id'
 ax html page.html 'table.stats' --table          # <table> → rows JSON
 ax html page.html --outline                      # repeating structures
 ax html page.html --locate 'some text'           # where does this live?
-ax json data.json '.items[].name' --raw          # jq-subset paths
-ax json api.json '.users[]' --where 'active == true && age > 20'
 ax yaml compose.yml '.services[].image' --raw    # same paths for YAML
 ax text app.log --grep 'ERROR|WARN' --count
 ax text style.css --extract '#[0-9a-fA-F]{6}' --freq   # grep -o + uniq -c
 ax enc jwt "$TOKEN"                              # peek header/payload
-ax enc base64 -d 'aGVsbG8='
 ax time 1783332078                               # epoch → ISO/local/relative
 ```
+
+One question → one call: prefer `--where/--pick/--freq` in a single command over
+building shell pipelines. When you do pipe ax into ax, add `--all` upstream.
 
 Full reference: `ax --help`, `ax <command> --help`, or fetch
 https://ax.yusuke.run/llms.txt

@@ -3,6 +3,7 @@ import { parseArgs, num } from '../lib/args'
 import { readSource, fail } from '../lib/io'
 import { emitLines, emitJson } from '../lib/emit'
 import { compileWhere } from '../lib/expr'
+import { toTsv } from '../lib/query'
 
 export const htmlHelp = `ax html — extract from HTML with CSS selectors (no regex, no broken markup)
 
@@ -96,13 +97,19 @@ export async function html(argv: string[]) {
     limit: { type: 'string' },
     table: { type: 'boolean' },
     where: { type: 'string' },
+    tsv: { type: 'boolean' },
+    budget: { type: 'string' },
   })
   if (flags.help) return console.log(htmlHelp)
   const wherePred = typeof flags.where === 'string' ? compileWhere(flags.where) : null
 
   const [src, selector] = _
   const { document } = parseHTML(await readSource(src))
-  const opts = { limit: num(flags.limit, 50), all: flags.all === true }
+  const opts = {
+    limit: num(flags.limit, 50),
+    all: flags.all === true,
+    budget: num(flags.budget, 0),
+  }
   const scope = (): ParentNode => {
     if (!selector) return document.querySelector('body') ?? document
     const el = document.querySelector(selector)
@@ -186,7 +193,9 @@ export async function html(argv: string[]) {
     const parsed = targets.map(parse)
     if (wherePred) for (const p of parsed) p.rows = p.rows.filter(wherePred)
     // One table → just its rows; several → keep them separate.
-    return emitJson(parsed.length === 1 ? parsed[0]!.rows : parsed, opts)
+    const tableResult = parsed.length === 1 ? parsed[0]!.rows : parsed
+    if (flags.tsv) return emitLines(toTsv(tableResult), opts)
+    return emitJson(tableResult, opts)
   }
 
   // Everything below needs a selector.
@@ -214,7 +223,9 @@ export async function html(argv: string[]) {
       }
       return obj
     })
-    return emitJson(wherePred ? rows.filter(wherePred) : rows, opts)
+    const rowResult = wherePred ? rows.filter(wherePred) : rows
+    if (flags.tsv) return emitLines(toTsv(rowResult), opts)
+    return emitJson(rowResult, opts)
   }
 
   if (flags.json) {
