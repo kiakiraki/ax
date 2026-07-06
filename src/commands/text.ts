@@ -67,7 +67,8 @@ export async function text(argv: string[]) {
         .join('\n')
     }
     const re = compile(flags.extract, flags['ignore-case'] ? 'gi' : 'g')
-    const matches = [...source.matchAll(re)].map((m) => m[0])
+    // Capture-group semantics: /took (\d+)ms/ emits the group, not the match.
+    const matches = [...source.matchAll(re)].map((m) => m[1] ?? m[0])
     if (flags.count) return void process.stdout.write(matches.length + '\n')
     if (flags.freq) {
       const counts = new Map<string, number>()

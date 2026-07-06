@@ -2,7 +2,9 @@ node_modules/
 # compiled single-file binary
 /ax
 *.log
-bench/
 dist/
 content.gen.ts
 website/src/og.png
+bench/*.html
+bench/*.json
+bench/*.log

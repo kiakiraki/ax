@@ -49,6 +49,25 @@ ax time 1783332078                               # epoch → ISO/local/relative
 One question → one call: prefer `--where/--pick/--freq` in a single command over
 building shell pipelines. When you do pipe ax into ax, add `--all` upstream.
 
+## Speed discipline
+
+Aim for ≤3 tool calls on a multi-part question: one batched look, one batched
+query line, then answer. Turns cost more than commands — semicolons are free.
+
+```sh
+# call 1 — look at everything at once:
+ax text app.log --head 5; ax json users.json --shape
+# call 2 — every answer in one line (note the quoting: "field == 'string'"):
+ax text app.log --grep ' INFO ' --extract '(\d+)ms' --all | ax stats; \
+ax text app.log --grep ' ERROR ' --extract 'E\d+' --freq; \
+ax json users.json '.users[]' --where "active == true && plan == 'pro'" --pick age --raw --all | ax stats
+# call 3 — answer. Done.
+```
+
+ax is deterministic: do not re-verify results that came back consistent.
+One cross-check max, and only when numbers disagree. `ax stats` for
+percentiles/means, `--freq` for top-N: never hand-compute.
+
 Full reference: `ax --help`, `ax <command> --help`, or fetch
 https://ax.yusuke.run/llms.txt
 

@@ -130,7 +130,14 @@ export function emitQueryResult(
 
   if (typeof flags.where === 'string') {
     if (!Array.isArray(result)) fail('--where needs an array result', 'iterate with [] first')
-    result = result.filter(compileWhere(flags.where))
+    const rows = result as unknown[]
+    const filtered = rows.filter(compileWhere(flags.where))
+    if (rows.length > 0 && filtered.length === 0) {
+      process.stderr.write(
+        `ax: note: 0 of ${rows.length} rows matched --where — if comparing to a string, quote it: --where "plan == 'pro'"\n`
+      )
+    }
+    result = filtered
   }
 
   if (typeof flags.pick === 'string') result = pick(result, flags.pick)

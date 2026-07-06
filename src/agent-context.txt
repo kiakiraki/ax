@@ -57,6 +57,9 @@ ax json also reads NDJSON / concatenated JSON (parsed as an array).
   `--limit n` / `--all` / `--budget <tokens>` control it.
 - When piping ax into ax, add `--all` (or a budget) to the upstream call.
 - Errors are one line on stderr with a hint; fix the flag, don't rewrite the approach.
-- Batching several related probes in one shell line is fine.
+- For a multi-part question, plan every probe up front and run them ALL in one
+  batched shell line; answer on the next turn. Turns cost more than commands.
+- ax is deterministic: don't re-verify consistent results. One cross-check max,
+  and only when numbers disagree.
 - For a trivial single grep or line count, plain grep is fine too — reach for
   ax when structure, filtering, or aggregation is involved.

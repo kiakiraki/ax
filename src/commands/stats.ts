@@ -24,9 +24,11 @@ export async function stats(argv: string[]) {
   const { _, flags } = parseArgs(argv, { help: { type: 'boolean' } })
   if (flags.help) return console.log(statsHelp)
 
+  // parseFloat is forgiving: "39ms" → 39, so upstream extractions that keep
+  // a unit suffix still work.
   const nums = (await readSource(_[0]))
     .split('\n')
-    .map((l) => Number(l.trim()))
+    .map((l) => parseFloat(l.trim()))
     .filter((n) => Number.isFinite(n))
   if (nums.length === 0) fail('no numbers in input', 'expected one number per line')
 
