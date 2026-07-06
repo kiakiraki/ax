@@ -53,6 +53,9 @@ building shell pipelines. When you do pipe ax into ax, add `--all` upstream.
 
 Aim for ≤3 tool calls on a multi-part question: one batched look, one batched
 query line, then answer. Turns cost more than commands — semicolons are free.
+When the question already names the files and fields, merge the look into the
+query call (put --shape/--outline first on the same line) and answer on turn 2.
+Answer with the numbers, concisely — no methodology narration.
 
 ```sh
 # call 1 — look at everything at once:

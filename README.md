@@ -3,11 +3,11 @@
 **A scriptless multitool for AI agents.** Reach for `ax` instead of writing a throwaway `python3 <<'PY' ... re ... PY` script every time an agent needs to pull data out of HTML, JSON, or text.
 
 ```
-ax html https://news.ycombinator.com '.titleline > a' --text
+ax json api.json --shape                          # any JSON, summarized in one line
+ax json api.json '.users[]' --where "active == true && age > 40" --pick country --freq
 ax html page.html '.lesson' --row 'title=a, href=a@href, level=.cefr'
-ax json api.json '.data.users[]' --where 'active == true' --raw
 ax yaml docker-compose.yml '.services[].image' --raw
-ax text app.log --grep 'ERROR|WARN' --count
+ax text app.log --grep ' INFO ' --extract '(\d+)ms' --all | ax stats
 ax enc jwt "$TOKEN"
 ax time 1783332078
 ```

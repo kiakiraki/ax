@@ -1,0 +1,1 @@
+sample.html in the current directory is a lesson-list page saved from the web. Extract every lesson into JSON objects {title, href, level}. Then report: (1) how many lessons have level B2, (2) the titles of the first three B2 lessons.
