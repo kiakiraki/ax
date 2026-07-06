@@ -1,0 +1,86 @@
+# ax
+
+> ax is a scriptless multitool CLI for AI agents. Use it instead of writing a
+> throwaway python/regex script when you need to extract data from HTML, query
+> JSON, or process text. Input is a file path, a URL (http/https), or `-` for
+> stdin. Output is JSON or plain lines, capped by default to stay token-cheap.
+
+Install: curl -fsSL https://ax.yusuke.run/install | sh
+Agent skill (Claude Code): https://ax.yusuke.run/skill.md
+Source: https://github.com/yusukebe/ax
+
+## Conventions
+
+- Source argument: file path | URL | `-` (stdin)
+- `--limit <n>` caps results (default 50); `--all` removes the cap
+- Hidden results are announced on stderr (never silent truncation)
+- Errors: single line `ax: error: <msg>` on stderr, exit 1, often with a hint
+- Compose commands with pipes; every command reads stdin with `-`
+
+## ax html — extract from HTML with CSS selectors
+
+    ax html <file|url|-> <selector> [options]
+
+    --text            text content per match (default)
+    --attr <name>     attribute value per match (e.g. --attr href)
+    --html            inner HTML per match
+    --json            JSON array of {text, html, attrs}
+    --row <spec>      structured rows: 'name=sel, name2=sel@attr, ...'
+                      sel is relative to each match; @attr reads an attribute;
+                      empty sel (id=@data-id) targets the match itself
+    --outline         discovery: repeating tag.class signatures with counts
+    --locate <text>   discovery: selector paths that contain text (also
+                      matches attribute values); returns {selector, match}
+    --count           how many elements match the selector
+
+Discovery workflow for an unknown page:
+1. `ax html URL --outline` → find the repeating block (e.g. 50x div.card)
+2. `ax html URL --locate 'landmark text'` → get the selector path
+3. `ax html URL '.card' --count` → confirm
+4. `ax html URL '.card' --row 'title=a, href=a@href'` → extract
+
+Examples:
+    ax html page.html '.lesson a' --attr href
+    ax html https://example.com 'h2' --text
+    ax html page.html '.lesson' --row 'title=a, href=a@href, level=.cefr'
+    ax html https://site.com/ --outline
+    ax html https://site.com/ --locate 'BurgerBarn'
+
+## ax json — query JSON with a jq-subset path language
+
+    ax json <file|url|-> [path] [options]
+
+    Path syntax: .  .key  .a.b.c  .items[]  .items[0]  .items[].name
+    --keys      list keys (object) or indices (array)
+    --len       length of result
+    --raw       print scalars as bare lines instead of JSON
+
+Examples:
+    ax json data.json '.items[].name' --raw
+    ax json api.json '.data.users[0]'
+    cat x.json | ax json - --keys
+
+## ax text — line-oriented text processing
+
+    ax text <file|url|-> [options]
+
+    --grep <re>      keep lines matching a regex
+    --invert         with --grep, keep non-matching lines
+    -i               case-insensitive
+    --extract <re>   emit each regex match, not lines (grep -o)
+    --freq           with --extract, frequency table (uniq -c, sorted desc)
+    --count          count of matches only
+    --head <n> / --tail <n>
+
+Examples:
+    ax text app.log --grep 'ERROR|WARN' --count
+    ax text style.css --extract '#[0-9a-fA-F]{6}' --freq
+    ax text https://site.com/data.txt --head 20
+
+## Etiquette for agents
+
+- One probe per shell call; no `echo "==="` banners — the call labels itself.
+- Respect the default cap; add `--all` only when needed.
+- Read the stderr note/hint before retrying anything.
+- Prefer `--row` over N separate extractions + manual zipping.
+- Prefer `--outline`/`--locate` over dumping raw HTML into context.

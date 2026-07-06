@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import agentContext from './agent-context.txt' with { type: 'text' }
 import { html, htmlHelp } from './commands/html'
 import { json, jsonHelp } from './commands/json'
 import { text, textHelp } from './commands/text'
@@ -11,9 +12,10 @@ Reach for this instead of writing a throwaway python/regex script.
 JSON is the lingua franca; output is capped by default to stay token-cheap.
 
 commands:
-  html   extract from HTML with CSS selectors
-  json   query JSON with a jq-subset path language
-  text   line-oriented grep / head / tail / count
+  html           extract from HTML with CSS selectors
+  json           query JSON with a jq-subset path language
+  text           line-oriented grep / extract / head / tail / count
+  agent-context  print the full agent playbook (also at https://ax.yusuke.run/llms.txt)
 
 run 'ax <command> --help' for details, e.g. ax html --help`
 
@@ -32,6 +34,10 @@ async function main() {
   }
   if (cmd === '--version' || cmd === '-v') {
     console.log(VERSION)
+    return
+  }
+  if (cmd === 'agent-context') {
+    console.log(agentContext)
     return
   }
 
