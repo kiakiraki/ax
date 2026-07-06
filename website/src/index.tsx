@@ -25,17 +25,26 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--round);lin
 a{color:inherit;text-decoration:none}
 code,pre{font-family:var(--mono)}
 ::selection{background:var(--acc-soft);color:#c2410c}
-.top{display:flex;align-items:center;justify-content:space-between;max-width:960px;
+.top{display:flex;align-items:center;justify-content:space-between;max-width:1080px;
 margin:0 auto;padding:24px 36px}
 .logo{font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px}
 .logo b{color:var(--acc)}
 .top nav{display:flex;gap:10px;font-size:13.5px}
 .top nav a{padding:7px 14px;border-radius:999px;background:var(--card);border:2px solid var(--line);transition:.15s}
 .top nav a:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
-.intro{max-width:960px;margin:0 auto;padding:70px 36px 60px;position:relative}
-.mascot{position:absolute;right:48px;top:44px;font-size:120px;line-height:1;
+.intro{max-width:1080px;margin:0 auto;padding:70px 36px 60px;display:grid;
+grid-template-columns:minmax(0,1fr) 340px;gap:48px;align-items:center}
+.hero-art{display:flex;flex-direction:column;align-items:center;gap:28px}
+.mascot{font-size:140px;line-height:1;
 animation:float 4s ease-in-out infinite;filter:drop-shadow(0 10px 0 var(--shadow));user-select:none}
 @keyframes float{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-12px) rotate(-2deg)}}
+.term{width:100%;background:var(--card);border:2px solid var(--line);border-radius:16px;
+box-shadow:0 6px 0 var(--shadow);overflow:hidden}
+.term .bar{display:flex;gap:6px;padding:10px 14px;border-bottom:2px solid var(--line);background:#fff4e8}
+.term .dot{width:10px;height:10px;border-radius:50%;background:var(--shadow)}
+.term .dot:first-child{background:var(--acc)}
+.term pre{margin:0;padding:14px 16px;font-size:11.5px;line-height:1.65;overflow-x:auto}
+.term .p{color:var(--acc);font-weight:700}
 h1{font-size:clamp(34px,6.6vw,64px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin:0 0 22px;max-width:640px}
 .mark{background:var(--acc);color:#fff;padding:.02em .3em;border-radius:14px;display:inline-block;transform:rotate(-2deg)}
 .strike{text-decoration:line-through;text-decoration-thickness:4px;text-decoration-color:var(--acc);color:var(--soft)}
@@ -53,7 +62,7 @@ letter-spacing:.06em;text-transform:uppercase}
 font-weight:700;font-family:var(--round);background:var(--acc);color:#fff;cursor:pointer;
 box-shadow:0 3px 0 #d94a10;transition:.15s}
 .step button:hover{transform:translateY(2px);box-shadow:0 1px 0 #d94a10}
-section{max-width:960px;margin:0 auto;padding:0 36px 92px}
+section{max-width:1080px;margin:0 auto;padding:0 36px 92px}
 h2{font-size:clamp(22px,3.4vw,30px);letter-spacing:-.02em;margin:0 0 26px;font-weight:800}
 .duel{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .duel .pane{padding:20px 22px;background:var(--card);min-width:0;border-radius:20px;
@@ -92,17 +101,23 @@ font-family:var(--mono);background:var(--card);border:2px solid var(--line);
 box-shadow:0 4px 0 var(--shadow);transition:.15s}
 .files a:hover{transform:translateY(2px);box-shadow:0 1px 0 var(--shadow)}
 .files a span{color:var(--acc);font-weight:700}
-.bottom{max-width:960px;margin:0 auto;padding:10px 36px 56px;display:flex;align-items:center;
+.bottom{max-width:1080px;margin:0 auto;padding:10px 36px 56px;display:flex;align-items:center;
 justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--soft)}
 .bottom a{text-decoration:underline;text-underline-offset:3px}
 .bottom a:hover{color:var(--acc)}
+@media(max-width:960px){
+.intro{grid-template-columns:1fr;gap:24px}
+.hero-art{flex-direction:row;justify-content:center}
+.mascot{font-size:80px}
+.term{max-width:420px}
+}
 @media(max-width:760px){
-.mascot{position:static;font-size:72px;display:block;margin-bottom:10px}
 .duel{grid-template-columns:1fr}
 .grid{grid-template-columns:1fr}
 .top,.intro,section,.bottom{padding-left:20px;padding-right:20px}
 .step{flex-wrap:wrap}
 .step code{white-space:normal;word-break:break-all}
+.term{display:none}
 }`
 
 const js = `
@@ -166,30 +181,54 @@ const Page = () => (
       </header>
 
       <div class='intro'>
-        <div class='mascot'>🪓</div>
-        <h1>
-          One binary.
-          <br />
-          No more <span class='strike'>throwaway scripts</span>.<br />
-          Just <span class='mark'>ax</span>.
-        </h1>
-        <p class='sub'>
-          A scriptless multitool for AI agents. Extract from HTML, query JSON and YAML, process
-          text, decode and convert — in one line instead of a python heredoc. Token-cheap output,
-          structured errors, capped by default.
-        </p>
-        <div class='steps'>
-          <div class='step'>
-            <span class='n'>1</span>
-            <span class='what'>install</span>
-            <code>{INSTALL_CMD}</code>
-            <button data-copy={INSTALL_CMD}>copy</button>
+        <div>
+          <h1>
+            One binary.
+            <br />
+            No more <span class='strike'>throwaway scripts</span>.<br />
+            Just <span class='mark'>ax</span>.
+          </h1>
+          <p class='sub'>
+            A scriptless multitool for AI agents. Extract from HTML, query JSON and YAML, process
+            text, decode and convert — in one line instead of a python heredoc. Token-cheap output,
+            structured errors, capped by default.
+          </p>
+          <div class='steps'>
+            <div class='step'>
+              <span class='n'>1</span>
+              <span class='what'>install</span>
+              <code>{INSTALL_CMD}</code>
+              <button data-copy={INSTALL_CMD}>copy</button>
+            </div>
+            <div class='step'>
+              <span class='n'>2</span>
+              <span class='what'>teach agent</span>
+              <code>{AGENT_PROMPT}</code>
+              <button data-copy={AGENT_PROMPT}>copy</button>
+            </div>
           </div>
-          <div class='step'>
-            <span class='n'>2</span>
-            <span class='what'>teach agent</span>
-            <code>{AGENT_PROMPT}</code>
-            <button data-copy={AGENT_PROMPT}>copy</button>
+        </div>
+        <div class='hero-art'>
+          <div class='mascot'>🪓</div>
+          <div class='term'>
+            <div class='bar'>
+              <span class='dot'></span>
+              <span class='dot'></span>
+              <span class='dot'></span>
+            </div>
+            <pre
+              dangerouslySetInnerHTML={{
+                __html: `<span class="p">$</span> ax html page.html '.lesson' \\
+    --row 'title=a, level=.cefr'
+[
+  { "title": "Small talk",
+    "level": "A2" },
+  ...
+]
+<span class="p">$</span> ax enc jwt "$TOKEN"
+{ "payload": { "name": "yusuke" } }`,
+              }}
+            />
           </div>
         </div>
       </div>
