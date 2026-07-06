@@ -44,11 +44,18 @@ export async function json(argv: string[]) {
   if (flags.help) return console.log(jsonHelp)
 
   const [src, path] = _
+  const input = await readSource(src)
   let root: unknown
   try {
-    root = JSON.parse(await readSource(src))
+    root = JSON.parse(input)
   } catch (e) {
-    return fail(`invalid JSON: ${(e as Error).message}`)
+    // NDJSON / JSON Lines / concatenated JSON: parse per line into an array.
+    const lines = input.split('\n').filter((l) => l.trim().length > 0)
+    try {
+      root = lines.map((l) => JSON.parse(l))
+    } catch {
+      return fail(`invalid JSON: ${(e as Error).message}`)
+    }
   }
 
   emitQueryResult(runQuery(root, path), flags)

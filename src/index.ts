@@ -3,6 +3,7 @@ import agentContext from './agent-context.txt' with { type: 'text' }
 import { enc, encHelp } from './commands/enc'
 import { html, htmlHelp } from './commands/html'
 import { json, jsonHelp } from './commands/json'
+import { stats, statsHelp } from './commands/stats'
 import { text, textHelp } from './commands/text'
 import { time, timeHelp } from './commands/time'
 import { yaml, yamlHelp } from './commands/yaml'
@@ -19,6 +20,7 @@ commands:
   json           query JSON with a jq-subset path language
   yaml           query YAML with the same path language
   text           line-oriented grep / extract / head / tail / count
+  stats          count / mean / min / max / percentiles over numbers
   enc            base64 / url / hex / jwt / sha256 conversions
   time           epoch / ISO / human time conversions
   agent-context  print everything an agent needs to know (also at https://ax.yusuke.run/llms.txt)
@@ -30,6 +32,7 @@ const commands: Record<string, { run: (a: string[]) => unknown; help: string }> 
   json: { run: json, help: jsonHelp },
   yaml: { run: yaml, help: yamlHelp },
   text: { run: text, help: textHelp },
+  stats: { run: stats, help: statsHelp },
   enc: { run: enc, help: encHelp },
   time: { run: time, help: timeHelp },
 }

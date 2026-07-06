@@ -9,7 +9,8 @@ usage:
 
 options:
   --grep <pattern>     keep lines matching a regex
-  --extract <pattern>  emit each regex match, not lines (grep -o)
+  --extract <pattern>  emit each regex match, not lines (grep -o);
+                       composes with --grep (extracts from matching lines only)
   --freq               with --extract, frequency table (uniq -c, sorted)
   --invert             with --grep, keep NON-matching lines
   -i, --ignore-case    case-insensitive matching
@@ -55,9 +56,18 @@ export async function text(argv: string[]) {
 
   // --extract: pull out every regex match (grep -o), optionally as a
   // frequency table (--freq) — the sort | uniq -c | sort -rn idiom built in.
+  // Composes with --grep: extraction runs only on matching lines.
   if (typeof flags.extract === 'string') {
+    let source = input
+    if (typeof flags.grep === 'string') {
+      const lineRe = compile(flags.grep, flags['ignore-case'] ? 'i' : '')
+      source = input
+        .split('\n')
+        .filter((l) => lineRe.test(l) !== (flags.invert === true))
+        .join('\n')
+    }
     const re = compile(flags.extract, flags['ignore-case'] ? 'gi' : 'g')
-    const matches = [...input.matchAll(re)].map((m) => m[0])
+    const matches = [...source.matchAll(re)].map((m) => m[0])
     if (flags.count) return void process.stdout.write(matches.length + '\n')
     if (flags.freq) {
       const counts = new Map<string, number>()

@@ -36,10 +36,14 @@ ax text <src>
     --grep <re> [-i] [--invert]   --extract <re> [--freq]   grep -o + uniq -c
     --count  --head n  --tail n
 
+ax stats <src|->                                       count/mean/min/max/p50/p90/p95/p99
+    ax text app.log --grep INFO --extract '\d+(?=ms)' --all | ax stats
 ax enc <base64|url|hex|jwt|sha256|sha1|md5> [input]   (-d to decode; jwt shows
     header+payload with exp/iat as ISO)
 ax time [now|epoch|ISO] [--tz Zone]                    epoch/ISO/local/relative
 ax agent-context                                       print this document
+
+ax json also reads NDJSON / concatenated JSON (parsed as an array).
 
 ## --where expressions (no eval)
 
