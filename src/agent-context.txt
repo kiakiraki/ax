@@ -36,6 +36,11 @@ ax text <src>
     --grep <re> [-i] [--invert]   --extract <re> [--freq]   grep -o + uniq -c
     --count  --head n  --tail n
 
+ax http <url> [-X POST] [-H 'k: v'] [-d body]          curl for agents
+    Always returns {status, ok, ms, headers, body} — an empty body or error
+    status is still a full report. JSON bodies are parsed (pipe into ax json).
+    Body capped at ~500 tokens (--budget T / --all).
+
 ax stats <src|->                                       count/mean/min/max/p50/p90/p95/p99
     ax text app.log --grep INFO --extract '\d+(?=ms)' --all | ax stats
 ax enc <base64|url|hex|jwt|sha256|sha1|md5> [input]   (-d to decode; jwt shows
