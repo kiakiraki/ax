@@ -2,6 +2,7 @@ import { parseHTML } from 'linkedom'
 import { parseArgs, num } from '../lib/args'
 import { readSource, fail } from '../lib/io'
 import { emitLines, emitJson } from '../lib/emit'
+import { compileWhere } from '../lib/expr'
 
 export const htmlHelp = `ax html — extract from HTML with CSS selectors (no regex, no broken markup)
 
@@ -16,6 +17,9 @@ options:
   --row <spec>      extract structured rows: 'name=sel, name2=sel@attr, ...'
                     sel is relative to each match; @attr reads an attribute;
                     an empty sel (e.g. id=@data-id) targets the match itself
+  --table           parse <table> into rows keyed by headers
+                    (selector optional; defaults to every table on the page)
+  --where <expr>    filter --row/--table rows: level ~ /^A/ && title != ''
   --limit <n>       cap results (default 50)
   --all             no cap
 
@@ -90,8 +94,11 @@ export async function html(argv: string[]) {
     row: { type: 'string' },
     locate: { type: 'string' },
     limit: { type: 'string' },
+    table: { type: 'boolean' },
+    where: { type: 'string' },
   })
   if (flags.help) return console.log(htmlHelp)
+  const wherePred = typeof flags.where === 'string' ? compileWhere(flags.where) : null
 
   const [src, selector] = _
   const { document } = parseHTML(await readSource(src))
@@ -145,6 +152,43 @@ export async function html(argv: string[]) {
     return emitJson(hits, opts)
   }
 
+  // --table: turn <table> elements into structured rows. Headers come from
+  // thead th (or the first row); each body row becomes {header: cell}.
+  // rowspan/colspan are not expanded.
+  if (flags.table) {
+    const tables = [...document.querySelectorAll(selector ?? 'table')].filter(
+      (el) => el.localName === 'table' || (el.querySelector('table') && el.localName !== 'table')
+    )
+    const targets = tables.flatMap((el) =>
+      el.localName === 'table' ? [el] : [...el.querySelectorAll('table')]
+    )
+    if (targets.length === 0) fail(`no <table> found${selector ? ` under: ${selector}` : ''}`)
+
+    const parse = (table: Element) => {
+      const allRows = [...table.querySelectorAll('tr')]
+      if (allRows.length === 0) return { headers: [], rows: [] }
+      const headerCells = [...(allRows[0]?.querySelectorAll('th') ?? [])]
+      const hasHeader = headerCells.length > 0
+      const headers = hasHeader
+        ? headerCells.map((c, i) => collapse(c.textContent ?? '') || `col${i}`)
+        : [...(allRows[0]?.querySelectorAll('td') ?? [])].map((_, i) => `col${i}`)
+      const dataRows = hasHeader ? allRows.slice(1) : allRows
+      const rows = dataRows
+        .map((tr) => {
+          const cells = [...tr.querySelectorAll('th, td')].map((c) => collapse(c.textContent ?? ''))
+          return Object.fromEntries(headers.map((h, i) => [h, cells[i] ?? null]))
+        })
+        // Drop all-empty rows (e.g. secondary header rows, spacer rows).
+        .filter((r) => Object.values(r).some((v) => v))
+      return { headers, rows }
+    }
+
+    const parsed = targets.map(parse)
+    if (wherePred) for (const p of parsed) p.rows = p.rows.filter(wherePred)
+    // One table → just its rows; several → keep them separate.
+    return emitJson(parsed.length === 1 ? parsed[0]!.rows : parsed, opts)
+  }
+
   // Everything below needs a selector.
   if (!selector) fail('missing selector', 'ax html <file|url|-> <selector>')
 
@@ -170,7 +214,7 @@ export async function html(argv: string[]) {
       }
       return obj
     })
-    return emitJson(rows, opts)
+    return emitJson(wherePred ? rows.filter(wherePred) : rows, opts)
   }
 
   if (flags.json) {

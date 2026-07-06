@@ -5,8 +5,11 @@
 ```
 ax html https://news.ycombinator.com '.titleline > a' --text
 ax html page.html '.lesson' --row 'title=a, href=a@href, level=.cefr'
-ax json api.json '.data.users[].email' --raw
+ax json api.json '.data.users[]' --where 'active == true' --raw
+ax yaml docker-compose.yml '.services[].image' --raw
 ax text app.log --grep 'ERROR|WARN' --count
+ax enc jwt "$TOKEN"
+ax time 1783332078
 ```
 
 ## Why

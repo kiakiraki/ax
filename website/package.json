@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun gen.ts && wrangler dev",
-    "deploy": "bun gen.ts && wrangler deploy",
+    "dev": "bun og.ts && bun gen.ts && wrangler dev",
+    "deploy": "bun og.ts && bun gen.ts && wrangler deploy",
     "format": "oxfmt --check .",
     "format:fix": "oxfmt --write ."
   },
@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260706.1",
+    "@resvg/resvg-js": "^2.6.2",
     "wrangler": "^4.0.0"
   }
 }

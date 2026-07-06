@@ -1,6 +1,6 @@
 ---
 name: ax
-description: Use the ax CLI instead of writing throwaway python/regex scripts when extracting data from HTML, querying JSON, or processing text from files, URLs, or stdin. Trigger whenever you are about to write an inline script (python3 heredoc, node -e, complex sed/awk) for one-off data extraction, scraping, or exploration of an unknown page.
+description: Use the ax CLI instead of writing throwaway python/regex scripts when extracting data from HTML, querying JSON/YAML, processing text, decoding base64/JWT, or converting timestamps. Trigger whenever you are about to write an inline script (python3 heredoc, node -e, complex sed/awk) for one-off data extraction, scraping, or exploration of an unknown page.
 ---
 
 # ax — a scriptless multitool for AI agents
@@ -12,7 +12,10 @@ file, a URL, or `-` (stdin), and speaks JSON.
 
 - You want data out of HTML (a page, a fragment, a saved file) → `ax html`
 - You want to query or reshape JSON → `ax json`
+- You want to read YAML (CI configs, compose, k8s) → `ax yaml`
 - You want grep/head/tail/count/extract over text → `ax text`
+- You want base64/url/hex/JWT decode or a hash → `ax enc`
+- You want epoch ⇔ ISO ⇔ timezone conversion → `ax time`
 - You do NOT know the page structure yet → `ax html --outline / --locate`
 
 Do not write a python heredoc or `node -e` script for these. One `ax` line is
@@ -30,14 +33,18 @@ cheaper to write, cheaper to read back, and does not break on markup shifts.
 
 ```sh
 ax html page.html '.item a' --attr href          # attribute per match
-ax html page.html '.item' --text                 # text per match
 ax html page.html '.item' --row 'title=a, href=a@href, id=@data-id'
+ax html page.html 'table.stats' --table          # <table> → rows JSON
 ax html page.html --outline                      # repeating structures
 ax html page.html --locate 'some text'           # where does this live?
 ax json data.json '.items[].name' --raw          # jq-subset paths
-ax json data.json --keys                         # top-level keys
+ax json api.json '.users[]' --where 'active == true && age > 20'
+ax yaml compose.yml '.services[].image' --raw    # same paths for YAML
 ax text app.log --grep 'ERROR|WARN' --count
 ax text style.css --extract '#[0-9a-fA-F]{6}' --freq   # grep -o + uniq -c
+ax enc jwt "$TOKEN"                              # peek header/payload
+ax enc base64 -d 'aGVsbG8='
+ax time 1783332078                               # epoch → ISO/local/relative
 ```
 
 Full reference: `ax --help`, `ax <command> --help`, or fetch

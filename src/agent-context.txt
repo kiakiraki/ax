@@ -2,8 +2,9 @@
 
 > ax is a scriptless multitool CLI for AI agents. Use it instead of writing a
 > throwaway python/regex script when you need to extract data from HTML, query
-> JSON, or process text. Input is a file path, a URL (http/https), or `-` for
-> stdin. Output is JSON or plain lines, capped by default to stay token-cheap.
+> JSON or YAML, process text, or do small encode/time conversions. Input is a
+> file path, a URL (http/https), or `-` for stdin. Output is JSON or plain
+> lines, capped by default to stay token-cheap.
 
 Install: curl -fsSL https://ax.yusuke.run/install | sh
 Agent skill (Claude Code): https://ax.yusuke.run/skill.md
@@ -28,6 +29,9 @@ Source: https://github.com/yusukebe/ax
     --row <spec>      structured rows: 'name=sel, name2=sel@attr, ...'
                       sel is relative to each match; @attr reads an attribute;
                       empty sel (id=@data-id) targets the match itself
+    --table           parse <table> into rows keyed by headers
+                      (selector optional; defaults to every table)
+    --where <expr>    filter --row/--table rows (see expressions below)
     --outline         discovery: repeating tag.class signatures with counts
     --locate <text>   discovery: selector paths that contain text (also
                       matches attribute values); returns {selector, match}
@@ -41,24 +45,27 @@ Discovery workflow for an unknown page:
 
 Examples:
     ax html page.html '.lesson a' --attr href
-    ax html https://example.com 'h2' --text
     ax html page.html '.lesson' --row 'title=a, href=a@href, level=.cefr'
+    ax html page.html 'table.wikitable' --table --where 'Population > 1000000'
     ax html https://site.com/ --outline
     ax html https://site.com/ --locate 'BurgerBarn'
 
-## ax json — query JSON with a jq-subset path language
+## ax json / ax yaml — query JSON or YAML with a jq-subset path language
 
     ax json <file|url|-> [path] [options]
+    ax yaml <file|url|-> [path] [options]     # multi-doc YAML → array of docs
 
-    Path syntax: .  .key  .a.b.c  .items[]  .items[0]  .items[].name
-    --keys      list keys (object) or indices (array)
-    --len       length of result
-    --raw       print scalars as bare lines instead of JSON
+    Path syntax: .  .key  .a.b.c  .["weird key"]  .items[]  .items[0]  .[0]
+    --where <expr>   filter an array result (see expressions below)
+    --keys           list keys (object) or indices (array)
+    --len            length of result
+    --raw            print scalars as bare lines instead of JSON
 
 Examples:
     ax json data.json '.items[].name' --raw
-    ax json api.json '.data.users[0]'
-    cat x.json | ax json - --keys
+    ax json api.json '.data.users[]' --where 'active == true' --raw
+    ax yaml docker-compose.yml '.services[].image' --raw
+    ax yaml .github/workflows/ci.yml '.jobs' --keys
 
 ## ax text — line-oriented text processing
 
@@ -75,12 +82,49 @@ Examples:
 Examples:
     ax text app.log --grep 'ERROR|WARN' --count
     ax text style.css --extract '#[0-9a-fA-F]{6}' --freq
-    ax text https://site.com/data.txt --head 20
+
+## ax enc — encode / decode / hash
+
+    ax enc <mode> [input]      # input from arg or stdin
+
+    base64 | url | hex         encode; decode with -d (base64url accepted)
+    jwt                        decode header+payload (no verification),
+                               exp/iat/nbf also shown as ISO times
+    sha256 | sha1 | md5        hex digest
+
+Examples:
+    ax enc base64 -d 'aGVsbG8='
+    ax enc jwt "$TOKEN"
+    ax enc sha256 'input'
+
+## ax time — epoch / ISO / human time
+
+    ax time [input] [--tz <zone>]
+
+    Input: (omitted)|now, epoch seconds, epoch millis, or any parseable date.
+    Output: {epoch, epoch_ms, iso, local, relative} + optional --tz zone.
+
+Examples:
+    ax time 1783332078
+    ax time '2026-07-06T19:00+09:00' --tz America/Los_Angeles
+
+## --where expressions (json, yaml, html --row/--table)
+
+A tiny safe expression language — not eval, no side effects:
+
+    price > 100 && stock != 0
+    name ~ /^Lesson/i || level == "A1"
+    !archived && tags.length >= 2
+
+Operators: == != > >= < <= ~ (regex) !~ && || ! ()
+Values: numbers, 'strings', /regex/flags, true/false/null, dot.paths, .length
+String numbers compare numerically ("25000" > 100 is true).
 
 ## Etiquette for agents
 
 - One probe per shell call; no `echo "==="` banners — the call labels itself.
 - Respect the default cap; add `--all` only when needed.
 - Read the stderr note/hint before retrying anything.
-- Prefer `--row` over N separate extractions + manual zipping.
+- Prefer `--row`/`--table` over N separate extractions + manual zipping.
 - Prefer `--outline`/`--locate` over dumping raw HTML into context.
+- Prefer `--where` over piping to another filter pass.

@@ -1,8 +1,11 @@
 #!/usr/bin/env bun
 import agentContext from './agent-context.txt' with { type: 'text' }
+import { enc, encHelp } from './commands/enc'
 import { html, htmlHelp } from './commands/html'
 import { json, jsonHelp } from './commands/json'
 import { text, textHelp } from './commands/text'
+import { time, timeHelp } from './commands/time'
+import { yaml, yamlHelp } from './commands/yaml'
 
 const VERSION = '0.1.0'
 
@@ -14,7 +17,10 @@ JSON is the lingua franca; output is capped by default to stay token-cheap.
 commands:
   html           extract from HTML with CSS selectors
   json           query JSON with a jq-subset path language
+  yaml           query YAML with the same path language
   text           line-oriented grep / extract / head / tail / count
+  enc            base64 / url / hex / jwt / sha256 conversions
+  time           epoch / ISO / human time conversions
   agent-context  print the full agent playbook (also at https://ax.yusuke.run/llms.txt)
 
 run 'ax <command> --help' for details, e.g. ax html --help`
@@ -22,7 +28,10 @@ run 'ax <command> --help' for details, e.g. ax html --help`
 const commands: Record<string, { run: (a: string[]) => unknown; help: string }> = {
   html: { run: html, help: htmlHelp },
   json: { run: json, help: jsonHelp },
+  yaml: { run: yaml, help: yamlHelp },
   text: { run: text, help: textHelp },
+  enc: { run: enc, help: encHelp },
+  time: { run: time, help: timeHelp },
 }
 
 async function main() {
