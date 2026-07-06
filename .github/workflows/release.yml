@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Build binaries for all targets
+        run: |
+          mkdir -p dist
+          for t in darwin-arm64 darwin-x64 linux-x64 linux-arm64 windows-x64; do
+            out="dist/ax-$t"
+            [ "$t" = "windows-x64" ] && out="$out.exe"
+            bun build src/index.ts --compile --target="bun-$t" --outfile "$out"
+          done
+          ls -lh dist/
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          shasum -a 256 ax-* > checksums.txt
+          cat checksums.txt
+
+      - name: Create GitHub Release
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
