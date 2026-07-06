@@ -1,6 +1,17 @@
 // Deterministic fixtures for the json / text benchmarks.
 const countries = ['JP', 'US', 'DE', 'BR', 'IN', 'FR', 'KE']
-const names = ['sato', 'suzuki', 'tanaka', 'kim', 'lee', 'muller', 'silva', 'patel', 'diaz', 'okoro']
+const names = [
+  'sato',
+  'suzuki',
+  'tanaka',
+  'kim',
+  'lee',
+  'muller',
+  'silva',
+  'patel',
+  'diaz',
+  'okoro',
+]
 
 // users.json — 600 users, nested-ish API export shape
 const users = Array.from({ length: 600 }, (_, k) => {

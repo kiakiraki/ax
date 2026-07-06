@@ -93,6 +93,16 @@ export async function text(argv: string[]) {
   if (typeof flags.head === 'string') lines = lines.slice(0, num(flags.head, 10))
   if (typeof flags.tail === 'string') lines = lines.slice(-num(flags.tail, 10))
 
+  // --freq without --extract: frequency table of whole lines (sort | uniq -c).
+  if (flags.freq) {
+    const counts = new Map<string, number>()
+    for (const l of lines) counts.set(l, (counts.get(l) ?? 0) + 1)
+    const freqLines = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([v, n]) => `${String(n).padStart(7)}  ${v}`)
+    return emitLines(freqLines, opts)
+  }
+
   if (flags.count) return void process.stdout.write(lines.length + '\n')
 
   emitLines(lines, opts)

@@ -82,16 +82,24 @@ function shapeOf(v: unknown, depth = 0): string {
 }
 
 // Project each row down to the picked fields (--pick 'a,b,c').
+// Fields may be dot paths: --pick 'customer.country,total'.
 function pick(result: unknown, spec: string): unknown {
   const fields = spec
     .split(',')
     .map((f) => f.trim())
     .filter(Boolean)
+  const dig = (row: unknown, path: string): unknown => {
+    let v: unknown = row
+    for (const key of path.split('.')) {
+      if (v === null || typeof v !== 'object') return null
+      v = (v as Record<string, unknown>)[key] ?? null
+    }
+    return v
+  }
   const project = (row: unknown) => {
     if (typeOf(row) !== 'object') return row
-    const r = row as Record<string, unknown>
-    if (fields.length === 1) return r[fields[0]!] ?? null
-    return Object.fromEntries(fields.map((f) => [f, r[f] ?? null]))
+    if (fields.length === 1) return dig(row, fields[0]!)
+    return Object.fromEntries(fields.map((f) => [f, dig(row, f)]))
   }
   return Array.isArray(result) ? result.map(project) : project(result)
 }
