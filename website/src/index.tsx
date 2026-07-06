@@ -116,7 +116,7 @@ document.querySelectorAll('[data-copy]').forEach(function(btn){
 
 const INSTALL_CMD = 'curl -fsSL https://ax.yusuke.run/install | sh'
 const AGENT_PROMPT =
-  'Read https://ax.yusuke.run/llms.txt and use the ax CLI instead of writing throwaway python/regex scripts.'
+  'The ax CLI is installed. Run `ax agent-context` to learn it, then use it instead of writing throwaway python/regex scripts.'
 
 const Page = () => (
   <html lang='en'>
