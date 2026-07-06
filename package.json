@@ -1,0 +1,30 @@
+{
+  "name": "ax",
+  "version": "0.1.0",
+  "description": "A scriptless multitool for AI agents — extract from HTML, query JSON, and process text in one line instead of a throwaway python script",
+  "license": "MIT",
+  "author": "Yusuke Wada <yusuke@kamawada.com>",
+  "type": "module",
+  "private": true,
+  "module": "src/index.ts",
+  "bin": {
+    "ax": "src/index.ts"
+  },
+  "scripts": {
+    "ax": "bun run src/index.ts",
+    "build": "bun build src/index.ts --compile --outfile ax",
+    "test": "bun test",
+    "format": "oxfmt --check .",
+    "format:fix": "oxfmt --write ."
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "oxfmt": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "linkedom": "^0.18.12"
+  }
+}
