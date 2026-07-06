@@ -4,6 +4,5 @@
   "main": "src/index.tsx",
   "compatibility_date": "2026-07-01",
   "routes": [{ "pattern": "ax.yusuke.run", "custom_domain": true }],
-  "rules": [{ "type": "Text", "globs": ["**/*.sh", "**/*.txt", "**/*.md"], "fallthrough": true }],
   "observability": { "enabled": true },
 }

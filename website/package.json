@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "bun gen.ts && wrangler dev",
+    "deploy": "bun gen.ts && wrangler deploy",
     "format": "oxfmt --check .",
     "format:fix": "oxfmt --write ."
   },

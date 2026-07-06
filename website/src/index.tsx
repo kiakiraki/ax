@@ -1,7 +1,5 @@
 import { Hono } from 'hono'
-import installSh from '../../scripts/install.sh'
-import skillMd from '../../skills/ax/SKILL.md'
-import llmsTxt from '../../src/agent-context.txt'
+import { duelBefore, installSh, llmsTxt, skillMd } from './content.gen'
 
 const app = new Hono()
 
@@ -145,17 +143,7 @@ const Page = () => (
         <div class='duel'>
           <div class='pane bad'>
             <div class='tag'>before — 3m19s, 8.6k tokens, breaks on markup shift</div>
-            <pre>{`python3 - <<'PY'
-import re
-h=open('page.html',errors='replace').read()
-blocks=re.findall(
-  r'<li class="lesson">([\\s\\S]*?)</li>',h)
-rows=[]
-for b in blocks:
-  href=re.search(r'href="([^"]+)"',b)
-  title=re.search(r'<a [^>]*>([^<]+)</a>',b)
-  ...
-PY`}</pre>
+            <pre>{duelBefore}</pre>
           </div>
           <div class='pane'>
             <div class='tag'>
