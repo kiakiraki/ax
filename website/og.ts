@@ -6,10 +6,10 @@ const svg = `<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http:/
   <rect width="1200" height="630" fill="#fff7ec"/>
   <!-- soft card behind the wordmark -->
   <rect x="60" y="76" width="220" height="164" rx="28" fill="#fffdf9" stroke="#f3e2cd" stroke-width="4"/>
-  <text x="170" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="120" font-weight="800" letter-spacing="-6" fill="#46372d">a<tspan fill="#ff5c1a">x</tspan></text>
+  <text x="170" y="196" text-anchor="middle" font-family="'Hiragino Maru Gothic ProN', 'Arial Rounded MT Bold', Helvetica, sans-serif" font-size="110" font-weight="800" letter-spacing="-4" fill="#ff5c1a">ax</text>
   <!-- headline -->
-  <text x="80" y="360" font-family="Helvetica, Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-2" fill="#46372d">One binary. No more</text>
-  <text x="80" y="442" font-family="Helvetica, Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-2" fill="#46372d">throwaway scripts.</text>
+  <text x="80" y="360" font-family="'Hiragino Maru Gothic ProN', 'Arial Rounded MT Bold', Helvetica, sans-serif" font-size="62" font-weight="800" letter-spacing="-1" fill="#46372d">One binary. No more</text>
+  <text x="80" y="442" font-family="'Hiragino Maru Gothic ProN', 'Arial Rounded MT Bold', Helvetica, sans-serif" font-size="62" font-weight="800" letter-spacing="-1" fill="#46372d">throwaway scripts.</text>
   <!-- prompt pill -->
   <rect x="76" y="492" width="880" height="64" rx="32" fill="#fffdf9" stroke="#f3e2cd" stroke-width="4"/>
   <text x="108" y="533" font-family="Menlo, monospace" font-size="24" fill="#ff5c1a">$</text>
