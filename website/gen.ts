@@ -1,6 +1,6 @@
 // Generate src/content.gen.ts with base64-encoded text assets.
 //
-// Why base64: the raw texts (install.sh, agent playbook, code samples) look
+// Why base64: the raw texts (install.sh, agent context, code samples) look
 // like shell/python payloads to Cloudflare's API WAF, which rejects the
 // script upload with an HTML 403. Encoding at build time keeps the deploy
 // body inert; the Worker decodes at runtime. Single source of truth stays

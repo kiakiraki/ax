@@ -308,8 +308,8 @@ ax time now --tz America/New_York`}</pre>
         <p>
           Output is capped by default (never silently). Errors are one structured line with a hint.
           <code> --help</code> costs a few dozen tokens, and <code>ax agent-context</code> prints
-          the whole playbook offline. Install the skill to make your agent reach for ax on its own —
-          works with Claude Code, Cursor, Codex, and 20+ agents via{' '}
+          everything an agent needs to know — offline. Install the skill to make your agent reach
+          for ax on its own — works with Claude Code, Cursor, Codex, and 20+ agents via{' '}
           <a href='https://www.skills.sh/' style='text-decoration:underline'>
             skills.sh
           </a>
@@ -318,7 +318,7 @@ ax time now --tz America/New_York`}</pre>
         <div class='steps'>
           <div class='step'>
             <span class='n'>$</span>
-            <span class='what'>playbook</span>
+            <span class='what'>learn</span>
             <code>ax agent-context</code>
             <button data-copy='ax agent-context'>copy</button>
           </div>

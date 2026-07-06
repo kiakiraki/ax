@@ -21,7 +21,7 @@ commands:
   text           line-oriented grep / extract / head / tail / count
   enc            base64 / url / hex / jwt / sha256 conversions
   time           epoch / ISO / human time conversions
-  agent-context  print the full agent playbook (also at https://ax.yusuke.run/llms.txt)
+  agent-context  print everything an agent needs to know (also at https://ax.yusuke.run/llms.txt)
 
 run 'ax <command> --help' for details, e.g. ax html --help`
 
