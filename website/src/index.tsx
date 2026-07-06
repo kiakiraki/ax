@@ -237,7 +237,7 @@ const Page = () => (
         <h2>Agents keep writing this.</h2>
         <div class='duel'>
           <div class='pane bad'>
-            <div class='tag'>before — 3m19s, 8.6k tokens</div>
+            <div class='tag'>before — one real session: 3m 19s · 8.6k tokens</div>
             <pre>{duelBefore}</pre>
           </div>
           <div class='pane'>
