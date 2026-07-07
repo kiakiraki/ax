@@ -97,11 +97,11 @@ letter-spacing:.08em;text-transform:uppercase}
 .install code{font-size:13.5px;overflow-x:auto;white-space:nowrap}
 .install code::before{content:'$ ';color:var(--acc);font-weight:700}
 .bench .rows{display:flex;flex-direction:column;gap:12px}
-.bench .brow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px 28px;
+.bench .brow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 20px;
 align-items:center;background:var(--card);border:2px solid var(--line);border-radius:16px;
 padding:14px 20px;box-shadow:0 5px 0 var(--shadow)}
 .bench .desc{font-size:14px}
-.bench .nums{font-family:var(--mono);font-size:12.5px;color:var(--soft);white-space:nowrap;text-align:right}
+.bench .nums{font-family:var(--mono);font-size:12.5px;color:var(--soft);white-space:nowrap;grid-column:1 / -1}
 .bench .nums b{color:var(--ink);font-weight:700}
 .bench .delta{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--acc);
 white-space:nowrap;background:var(--acc-soft);border-radius:999px;padding:6px 14px}
@@ -232,7 +232,7 @@ const Page = () => (
             </div>
             <pre
               dangerouslySetInnerHTML={{
-                __html: `<span class="p">$</span> ax page.html '.lesson' \\
+                __html: `<span class="p">$</span> ax https://site.com '.lesson' \\
     --row 'title=a, level=.cefr'
 [
   { "title": "Small talk",
@@ -256,7 +256,7 @@ const Page = () => (
           </div>
           <div class='pane'>
             <div class='tag'>after — one line</div>
-            <pre>{`ax page.html '.lesson' \\
+            <pre>{`ax https://site.com '.lesson' \\
   --row 'title=a, href=a@href, level=.cefr'
 
 [
@@ -308,23 +308,23 @@ ax url '.review' --like 'battery complaints'`}</pre>
           <div class='brow'>
             <span class='desc'>Live website extraction (real site, Opus 4.8)</span>
             <span class='nums'>
-              $0.332 · 41s → <b>$0.303 · 36s</b>
+              without ax <b>$0.332 · 41s</b> → with ax <b>$0.303 · 36s</b>
             </span>
-            <span class='delta'>wins on cost and time</span>
+            <span class='delta'>−9% cost · −13% time</span>
           </div>
           <div class='brow'>
             <span class='desc'>Two pages with markup drift (regex-breaker)</span>
             <span class='nums'>
-              $0.664 → <b>$0.338</b>
+              without ax <b>$0.664</b> → with ax <b>$0.338</b>
             </span>
             <span class='delta'>−49% cost</span>
           </div>
           <div class='brow'>
             <span class='desc'>Clean extraction, 300 rows + aggregate</span>
             <span class='nums'>
-              $0.267 · 40s → <b>$0.250 · 29s</b>
+              without ax <b>$0.267 · 40s</b> → with ax <b>$0.250 · 29s</b>
             </span>
-            <span class='delta'>−28% time</span>
+            <span class='delta'>−6% cost · −28% time</span>
           </div>
         </div>
         <p class='note'>
