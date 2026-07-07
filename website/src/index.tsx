@@ -109,6 +109,14 @@ white-space:nowrap;background:var(--acc-soft);border-radius:999px;padding:6px 14
 .bench .note a{text-decoration:underline;text-underline-offset:3px}
 .bench .note a:hover{color:var(--acc)}
 @media(max-width:760px){.bench .brow{grid-template-columns:1fr}.bench .nums{text-align:left}}
+.vs .vrow{display:grid;grid-template-columns:minmax(0,1fr) 70px 70px 70px;gap:10px;
+align-items:center;padding:10px 18px;background:var(--card);border:2px solid var(--line);border-radius:14px}
+.vs .vrow.head{background:transparent;border:none;font-size:11px;font-weight:800;color:var(--soft);
+text-transform:uppercase;letter-spacing:.06em;padding:2px 18px}
+.vs .vrow span{font-size:13.5px}
+.vs .vrow .m{text-align:center;font-family:var(--mono);font-weight:800}
+.vs .ok{color:var(--mint)} .vs .no{color:#d9a08d} .vs .half{color:var(--soft)}
+.vs .rows{display:flex;flex-direction:column;gap:8px}
 .agents .cols{display:grid;grid-template-columns:minmax(0,1fr) 500px;gap:56px;align-items:center}
 .agents p{font-size:15px;color:#6b5a4c;margin:0}
 .agents .steps{max-width:none}
@@ -302,18 +310,85 @@ ax url '.review' --like 'battery complaints'`}</pre>
         </div>
       </section>
 
+      <section class='vs'>
+        <h2>Versus the usual suspects.</h2>
+        <div class='rows'>
+          <div class='vrow head'>
+            <span></span>
+            <span class='m'>python</span>
+            <span class='m'>htmlq</span>
+            <span class='m'>ax</span>
+          </div>
+          <div class='vrow'>
+            <span>fetch with a full report (status / headers / ms)</span>
+            <span class='m half'>△</span>
+            <span class='m no'>✗</span>
+            <span class='m ok'>✓</span>
+          </div>
+          <div class='vrow'>
+            <span>structure discovery (--outline / --locate)</span>
+            <span class='m no'>✗</span>
+            <span class='m no'>✗</span>
+            <span class='m ok'>✓</span>
+          </div>
+          <div class='vrow'>
+            <span>multi-field rows in one call (--row / --table)</span>
+            <span class='m half'>△</span>
+            <span class='m no'>✗</span>
+            <span class='m ok'>✓</span>
+          </div>
+          <div class='vrow'>
+            <span>survives markup drift</span>
+            <span class='m no'>✗</span>
+            <span class='m ok'>✓</span>
+            <span class='m ok'>✓</span>
+          </div>
+          <div class='vrow'>
+            <span>semantic ranking (--like), offline · page → markdown (--md)</span>
+            <span class='m no'>✗</span>
+            <span class='m no'>✗</span>
+            <span class='m ok'>✓</span>
+          </div>
+          <div class='vrow'>
+            <span>token-shaped output (caps, --budget, never-silent notes)</span>
+            <span class='m no'>✗</span>
+            <span class='m no'>✗</span>
+            <span class='m ok'>✓</span>
+          </div>
+          <div class='vrow'>
+            <span>zero code authored per task</span>
+            <span class='m no'>✗</span>
+            <span class='m ok'>✓</span>
+            <span class='m ok'>✓</span>
+          </div>
+        </div>
+        <p class='note' style='font-size:12.5px;color:#a08d7c;margin-top:14px'>
+          △ = possible, but the agent writes and debugs the code every time — that authoring cost is
+          the point.
+        </p>
+      </section>
+
       <section class='bench'>
         <h2>Benchmarked, honestly.</h2>
         <div class='rows'>
           <div class='brow'>
-            <span class='desc'>Live website extraction (real site, Opus 4.8)</span>
+            <span class='desc'>
+              Live website extraction — warmed-up session (skill installed, agent already used ax)
+            </span>
+            <span class='delta'>−4% cost · −12% time</span>
+            <span class='nums'>
+              without ax <b>$0.277 · 55s</b> → with ax <b>$0.267 · 49s</b>
+            </span>
+          </div>
+          <div class='brow'>
+            <span class='desc'>Live website extraction — first encounter</span>
             <span class='nums'>
               without ax <b>$0.332 · 41s</b> → with ax <b>$0.303 · 36s</b>
             </span>
             <span class='delta'>−9% cost · −13% time</span>
           </div>
           <div class='brow'>
-            <span class='desc'>Two pages with markup drift (regex-breaker)</span>
+            <span class='desc'>Markup drift across two pages — where regex scripts break</span>
             <span class='nums'>
               without ax <b>$0.664</b> → with ax <b>$0.338</b>
             </span>
