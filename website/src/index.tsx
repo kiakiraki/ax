@@ -373,33 +373,33 @@ ax url '.review' --like 'battery complaints'`}</pre>
         <div class='rows'>
           <div class='brow'>
             <span class='desc'>
-              Live website extraction — warmed-up session (skill installed, agent already used ax)
+              Markup drift across two pages — where regex scripts break (Opus 4.8)
             </span>
-            <span class='delta'>−4% cost · −12% time</span>
-            <span class='nums'>
-              without ax <b>$0.277 · 55s</b> → with ax <b>$0.267 · 49s</b>
-            </span>
-          </div>
-          <div class='brow'>
-            <span class='desc'>Live website extraction — first encounter</span>
-            <span class='nums'>
-              without ax <b>$0.332 · 41s</b> → with ax <b>$0.303 · 36s</b>
-            </span>
-            <span class='delta'>−9% cost · −13% time</span>
-          </div>
-          <div class='brow'>
-            <span class='desc'>Markup drift across two pages — where regex scripts break</span>
+            <span class='delta'>½ the cost</span>
             <span class='nums'>
               without ax <b>$0.664</b> → with ax <b>$0.338</b>
             </span>
-            <span class='delta'>−49% cost</span>
+          </div>
+          <div class='brow'>
+            <span class='desc'>Same drift task on Haiku 4.5</span>
+            <span class='delta'>−46% cost</span>
+            <span class='nums'>
+              without ax <b>$0.093</b> → with ax <b>$0.051</b>
+            </span>
+          </div>
+          <div class='brow'>
+            <span class='desc'>Live website extraction (real site)</span>
+            <span class='delta'>−9% cost · −13% time</span>
+            <span class='nums'>
+              without ax <b>$0.332 · 41s</b> → with ax <b>$0.303 · 36s</b>
+            </span>
           </div>
           <div class='brow'>
             <span class='desc'>Clean extraction, 300 rows + aggregate</span>
+            <span class='delta'>−28% time</span>
             <span class='nums'>
               without ax <b>$0.267 · 40s</b> → with ax <b>$0.250 · 29s</b>
             </span>
-            <span class='delta'>−6% cost · −28% time</span>
           </div>
         </div>
         <p class='note'>

@@ -30,7 +30,7 @@ probing is free (--fresh to bypass).
 
 Aim for ≤3 tool calls: one batched look (`ax URL --outline; ax URL '.guess' --count`),
 one extraction call, then answer. Turns cost more than commands — semicolons
-are free. ax is deterministic: don't re-verify consistent results.
+are free. Every --row/--table run prints `N rows extracted` + empty-field counts on stderr — that IS the verification; do not re-probe.
 Answer with the data, concisely — no methodology narration.
 
 ## Output rules

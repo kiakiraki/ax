@@ -302,6 +302,7 @@ export async function root(argv: string[]) {
     const parsed = targets.map(parse)
     if (wherePred) for (const p of parsed) p.rows = p.rows.filter(wherePred)
     const tableResult = parsed.length === 1 ? parsed[0]!.rows : parsed
+    if (parsed.length === 1) rowStats(parsed[0]!.rows)
     if (typeof flags.like === 'string')
       return rankAndEmit(flags.like, tableResult as unknown[], flags, opts)
     if (flags.tsv) return emitLines(toTsv(tableResult), opts)
@@ -327,6 +328,7 @@ export async function root(argv: string[]) {
       return obj
     })
     const rowResult = wherePred ? rows.filter(wherePred) : rows
+    rowStats(rowResult)
     if (typeof flags.like === 'string') return rankAndEmit(flags.like, rowResult, flags, opts)
     if (flags.tsv) return emitLines(toTsv(rowResult), opts)
     return emitJson(rowResult, opts)
@@ -358,6 +360,20 @@ export async function root(argv: string[]) {
   const texts = els.map((el) => collapse(el.textContent ?? ''))
   if (typeof flags.like === 'string') return rankAndEmit(flags.like, texts, flags, opts)
   return emitLines(texts, opts)
+}
+
+// Completeness report for extractions: row count + per-field null counts on
+// stderr, so the agent never needs a separate verification probe.
+function rowStats(rows: Record<string, string | null>[]) {
+  if (rows.length === 0) return
+  const nulls: string[] = []
+  for (const key of Object.keys(rows[0]!)) {
+    const n = rows.filter((r) => r[key] === null || r[key] === '').length
+    if (n > 0) nulls.push(`${key}: ${n} empty`)
+  }
+  process.stderr.write(
+    `ax: note: ${rows.length} rows extracted${nulls.length ? ` — check: ${nulls.join(', ')}` : ', no empty fields'}\n`
+  )
 }
 
 async function rankAndEmit(

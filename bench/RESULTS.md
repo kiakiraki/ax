@@ -189,3 +189,10 @@ markup — a deliberate but structure-leaking design). Verdict: ax wins every
 web bench cold and warm; warm margins are slim because experience is the
 great equalizer on single-structure tasks. The big warm win (−43%) lives on
 multi-step investigations.
+
+### Haiku drift + row-stats note
+
+Haiku 4.5, markup-drift task, both correct: A $0.093 / 26s vs B **$0.051 /
+21.2s (−46%)**. Also shipped: --row/--table now print `N rows extracted` +
+empty-field counts on stderr, killing the verification-probe habit at the
+tool level.

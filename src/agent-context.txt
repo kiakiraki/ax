@@ -33,6 +33,8 @@ Skill: npx skills add yusukebe/ax   Source: https://github.com/yusukebe/ax
 
 ## Output rules
 
+- --row/--table always report `N rows extracted` + empty-field counts on stderr;
+  treat that as the completeness check — no extra verification probes needed.
 - Results cap at 50 (--limit n / --all / --budget <tokens>); truncation is
   always announced on stderr, never silent.
 - --tsv emits uniform rows as header-once TSV (≈1/3 the tokens of JSON).
