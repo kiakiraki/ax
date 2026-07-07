@@ -107,6 +107,26 @@ Conclusion baked into the skill: --like is a high-recall funnel for
 find-some/browse tasks, not an oracle for exhaustive counts. We did not run
 an A/B where the ax side would report a wrong exact count.
 
+### Warm (steady-state) measurement — the deployment-realistic condition
+
+All benches above are cold starts: the agent meets ax for the first time,
+while python/jq enjoy a training-data moat. Real deployment is warm — the
+skill is installed and the agent used ax minutes ago. Two-phase design:
+phase 1 (small task) warms the session; phase 2 (the 5-question incident
+investigation) is measured via `claude -p --resume` (Opus, both correct):
+
+| phase 2 (marginal) | A: baseline | B: ax (warm) | delta    |
+| ------------------ | ----------- | ------------ | -------- |
+| cost               | $0.180      | **$0.103**   | **−43%** |
+| time               | 56.7s       | **26.8s**    | **−53%** |
+| turns              | 5           | **3**        | −2       |
+
+The warmup phase itself also went to B ($0.150 vs $0.204 — including the
+skill tokens). Whole session: −34%. Against cold A ($0.309): −67%.
+
+**ax gets cheaper the longer an agent works with it; throwaway scripts
+never do — every new question is a new script.**
+
 ## Correctness
 
 Both conditions answered every question correctly in every round (15+ runs).

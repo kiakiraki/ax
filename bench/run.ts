@@ -8,6 +8,8 @@
 import { join } from 'node:path'
 
 const [dir, model, promptFile, ...rest] = process.argv.slice(2)
+const warmupIdx = rest.indexOf('--warmup')
+const warmupFile = warmupIdx !== -1 ? rest[warmupIdx + 1] : null
 if (!dir || !model || !promptFile) {
   console.error('usage: bun bench/run.ts <dir> <model> <prompt-file> [--skill]')
   process.exit(1)
@@ -20,9 +22,48 @@ if (rest.includes('--skill')) {
   prompt = `${body}\n\n${prompt}`
 }
 
+// Optional warm phase: run a small task first in the same session so the
+// measured phase reflects an agent that already knows the tools (resume).
+let resumeArgs: string[] = []
+if (warmupFile) {
+  let wp = await Bun.file(warmupFile).text()
+  if (rest.includes('--skill')) {
+    const body = (await Bun.file(skillPath).text()).split('\n').slice(6).join('\n')
+    wp = body + '\n\n' + wp
+    prompt = await Bun.file(promptFile).text() // measured phase: no skill re-prepend
+  }
+  const w = Bun.spawnSync(
+    [
+      'claude',
+      '-p',
+      wp,
+      '--model',
+      model,
+      '--output-format',
+      'json',
+      '--allowedTools',
+      'Bash,Read,Grep,Glob',
+      '--max-turns',
+      '40',
+    ],
+    { cwd: dir }
+  )
+  const wres = JSON.parse(w.stdout.toString().split('\n')[0]!)
+  console.error(
+    JSON.stringify({
+      phase: 'warmup',
+      cost: wres.total_cost_usd,
+      turns: wres.num_turns,
+      session: wres.session_id,
+    })
+  )
+  resumeArgs = ['--resume', wres.session_id]
+}
+
 const proc = Bun.spawn(
   [
     'claude',
+    ...resumeArgs,
     '-p',
     prompt,
     '--model',

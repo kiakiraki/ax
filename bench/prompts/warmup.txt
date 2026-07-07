@@ -1,0 +1,1 @@
+Quick check on app.log in the current directory: report how many ERROR lines it contains and the p50 response time (ms) of INFO lines. Keep it brief.
