@@ -219,3 +219,15 @@ A's python nothing; the measured drift phase pays no fresh skill tokens
 | markup drift | $0.458 / 30s / 3t    | **$0.150 / 30s / 5t — ⅓ the cost (−67%)** |
 
 The agent again cited the row-stats line as its verification.
+
+### Tool-warm full set — variance warning
+
+| tool-warm (n=1 each)    | python     | ax                                                 |
+| ----------------------- | ---------- | -------------------------------------------------- |
+| drift (Opus)            | $0.458     | **$0.150 (−67%)**                                  |
+| drift (Haiku)           | $0.086     | $0.080 (−6%)                                       |
+| live web (Opus)         | **$0.248** | $0.464 — B lost this run (12-turn generic-selector |
+| spree; behavioral dice) |
+
+Single warm runs swing hard. Before presenting a uniform "agent knows ax"
+table, run n≥3 per cell and average. Kept here so we don't fool ourselves.
