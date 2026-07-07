@@ -41,6 +41,7 @@ ax html page.html --outline                      # repeating structures
 ax html page.html --locate 'some text'           # where does this live?
 ax yaml compose.yml '.services[].image' --raw    # same paths for YAML
 ax text app.log --grep 'ERROR|WARN' --count
+ax text tickets.txt --like 'shipping complaints' --limit 10   # semantic grep — meaning, not regex
 ax text style.css --extract '#[0-9a-fA-F]{6}' --freq   # grep -o + uniq -c
 ax enc jwt "$TOKEN"                              # peek header/payload
 ax time 1783332078                               # epoch → ISO/local/relative
@@ -51,10 +52,13 @@ building shell pipelines. When you do pipe ax into ax, add `--all` upstream.
 
 ## Speed discipline
 
-Aim for ≤3 tool calls on a multi-part question: one batched look, one batched
-query line, then answer. Turns cost more than commands — semicolons are free.
+Aim for ≤3 tool calls TOTAL, no matter how many files or sub-questions: one
+batched look, one batched query line, then answer. Turns cost far more than
+commands — semicolons are free, so two files means the same line twice.
 When the question already names the files and fields, merge the look into the
 query call (put --shape/--outline first on the same line) and answer on turn 2.
+Verification probes (--count, --len, a cross-check) belong ON the same batched
+line as the queries — never as follow-up turns.
 Answer with the numbers, concisely — no methodology narration.
 
 ```sh

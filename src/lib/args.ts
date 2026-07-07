@@ -12,6 +12,19 @@ export function parseArgs(argv: string[], options: Options) {
     allowPositionals: true,
     strict: false,
   })
+  // Unknown flags are ignored by non-strict parsing — but ignoring them
+  // silently costs an agent a whole retry turn. Warn with a suggestion.
+  const known = Object.keys(options)
+  for (const key of Object.keys(values)) {
+    if (known.includes(key) || key.length === 1) continue
+    // Suggest only near-certain matches (shared 2-char prefix or containment).
+    const guess = known.find(
+      (k) => k.startsWith(key.slice(0, 2)) || k.includes(key) || key.includes(k)
+    )
+    process.stderr.write(
+      `ax: note: unknown flag --${key} ignored${guess ? ` (did you mean --${guess}?)` : ''} — see --help\n`
+    )
+  }
   return { _: positionals, flags: values as Record<string, string | boolean | undefined> }
 }
 

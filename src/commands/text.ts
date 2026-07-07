@@ -9,6 +9,10 @@ usage:
 
 options:
   --grep <pattern>     keep lines matching a regex
+  --like <query>       semantic grep: rank lines by meaning, not regex
+                       (local quantized MiniLM — offline after one-time
+                       download; composes with --grep as a prefilter)
+  --min <score>        with --like, drop lines scoring below this (0..1)
   --extract <pattern>  emit each regex match, not lines (grep -o);
                        composes with --grep (extracts from matching lines only)
   --freq               with --extract, frequency table (uniq -c, sorted)
@@ -22,6 +26,7 @@ options:
 
 examples:
   ax text app.log --grep 'ERROR|WARN' --count
+  ax text tickets.txt --like 'shipping complaints' --limit 10
   ax text style.css --extract '#[0-9a-fA-F]{3,8}' --freq
   ax text README.md --head 20
   cat data.txt | ax text - --grep '^\\d+' -i`
@@ -47,12 +52,19 @@ export async function text(argv: string[]) {
     limit: { type: 'string' },
     all: { type: 'boolean' },
     help: { type: 'boolean' },
+    like: { type: 'string' },
+    min: { type: 'string' },
+    budget: { type: 'string' },
   })
   if (flags.help) return console.log(textHelp)
 
   const [src] = _
   const input = await readSource(src)
-  const opts = { limit: num(flags.limit, 50), all: flags.all === true }
+  const opts = {
+    limit: num(flags.limit, 50),
+    all: flags.all === true,
+    budget: num(flags.budget, 0),
+  }
 
   // --extract: pull out every regex match (grep -o), optionally as a
   // frequency table (--freq) — the sort | uniq -c | sort -rn idiom built in.
@@ -92,6 +104,27 @@ export async function text(argv: string[]) {
 
   if (typeof flags.head === 'string') lines = lines.slice(0, num(flags.head, 10))
   if (typeof flags.tail === 'string') lines = lines.slice(-num(flags.tail, 10))
+
+  // --like: semantic grep. Ranks (grep-prefiltered) lines by meaning using a
+  // local quantized embedding model — the query regex can't express.
+  if (typeof flags.like === 'string') {
+    const { rankBySimilarity } = await import('../lib/embed')
+    const candidates = lines.filter((l) => l.trim().length > 0)
+    if (candidates.length === 0) fail('no lines to rank')
+    if (candidates.length > 2000) {
+      process.stderr.write(
+        `ax: note: embedding ${candidates.length} lines — a --grep prefilter would be faster\n`
+      )
+    }
+    const ranked = await rankBySimilarity(flags.like, candidates)
+    const minScore = typeof flags.min === 'string' ? Number(flags.min) : -Infinity
+    const out = ranked
+      .filter((r) => r.score >= minScore)
+      .map((r) => `${r.score.toFixed(3)}  ${r.line}`)
+    emitLines(out, opts)
+    // The wasm runtime's thread pool would otherwise keep the process alive.
+    process.exit(0)
+  }
 
   // --freq without --extract: frequency table of whole lines (sort | uniq -c).
   if (flags.freq) {

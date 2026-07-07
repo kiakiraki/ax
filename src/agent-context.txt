@@ -34,6 +34,10 @@ ax json <src> [path] / ax yaml <src> [path]
 
 ax text <src>
     --grep <re> [-i] [--invert]   --extract <re> [--freq]   grep -o + uniq -c
+    --like <query> [--min 0.3]    semantic grep: ranks lines by MEANING, for
+                                  queries a regex cannot express (local model,
+                                  offline, deterministic). Composes with --grep.
+        ax text tickets.txt --like 'shipping complaints' --limit 10
     --count  --head n  --tail n
 
 ax http <url> [-X POST] [-H 'k: v'] [-d body]          curl for agents
