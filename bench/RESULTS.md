@@ -207,3 +207,15 @@ tool level.
 
 TSV rows (57% fewer chars) + the `N rows extracted, no empty fields` note
 removed the verification turns exactly as designed.
+
+### Tool-warm, structure-cold (the "agent knows ax" condition)
+
+Warmup on an unrelated page (products.html) teaches B the tool but teaches
+A's python nothing; the measured drift phase pays no fresh skill tokens
+(history is cache-read). Opus, both correct:
+
+|              | python (tool-native) | ax (tool-warm)                            |
+| ------------ | -------------------- | ----------------------------------------- |
+| markup drift | $0.458 / 30s / 3t    | **$0.150 / 30s / 5t — ⅓ the cost (−67%)** |
+
+The agent again cited the row-stats line as its verification.

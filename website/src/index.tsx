@@ -375,13 +375,15 @@ ax url '.review' --like 'battery complaints'`}</pre>
             <span class='desc'>
               Markup drift across two pages — where regex scripts break (Opus 4.8)
             </span>
-            <span class='delta'>−58% cost</span>
+            <span class='delta'>⅓ the cost</span>
             <span class='nums'>
-              without ax <b>$0.664</b> → with ax <b>$0.282</b>
+              without ax <b>$0.458</b> → with ax <b>$0.150</b>
             </span>
           </div>
           <div class='brow'>
-            <span class='desc'>Same drift task on Haiku 4.5</span>
+            <span class='desc'>
+              Same drift task, first encounter — $0.664 → $0.282 (−58%) · on Haiku 4.5
+            </span>
             <span class='delta'>−46% cost</span>
             <span class='nums'>
               without ax <b>$0.093</b> → with ax <b>$0.051</b>

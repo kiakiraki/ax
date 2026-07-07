@@ -1,0 +1,1 @@
+Quick check on products.html in the current directory: how many .prod items are there, and what is the name and price of the cheapest one?
