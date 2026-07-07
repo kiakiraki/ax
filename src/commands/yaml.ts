@@ -30,5 +30,5 @@ export async function yaml(argv: string[]) {
   }
 
   const root: unknown = docs.length === 1 ? docs[0] : docs
-  emitQueryResult(runQuery(root, path), flags)
+  await emitQueryResult(runQuery(root, path), flags)
 }

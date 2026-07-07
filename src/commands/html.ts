@@ -99,6 +99,8 @@ export async function html(argv: string[]) {
     where: { type: 'string' },
     tsv: { type: 'boolean' },
     budget: { type: 'string' },
+    like: { type: 'string' },
+    min: { type: 'string' },
   })
   if (flags.help) return console.log(htmlHelp)
   const wherePred = typeof flags.where === 'string' ? compileWhere(flags.where) : null
@@ -224,6 +226,7 @@ export async function html(argv: string[]) {
       return obj
     })
     const rowResult = wherePred ? rows.filter(wherePred) : rows
+    if (typeof flags.like === 'string') return rankAndEmit(flags.like, rowResult, flags, opts)
     if (flags.tsv) return emitLines(toTsv(rowResult), opts)
     return emitJson(rowResult, opts)
   }
@@ -252,8 +255,25 @@ export async function html(argv: string[]) {
   }
 
   // default: text
-  return emitLines(
-    els.map((el) => collapse(el.textContent ?? '')),
+  const texts = els.map((el) => collapse(el.textContent ?? ''))
+  if (typeof flags.like === 'string') return rankAndEmit(flags.like, texts, flags, opts)
+  return emitLines(texts, opts)
+}
+
+// Rank items by semantic similarity and emit "score  item" lines.
+async function rankAndEmit(
+  query: string,
+  items: unknown[],
+  flags: Record<string, string | boolean | undefined>,
+  opts: { limit: number; all: boolean; budget: number }
+) {
+  const { rankBySimilarity } = await import('../lib/embed')
+  const strings = items.map((v) => (typeof v === 'string' ? v : JSON.stringify(v)))
+  const ranked = await rankBySimilarity(query, strings)
+  const minScore = typeof flags.min === 'string' ? Number(flags.min) : -Infinity
+  emitLines(
+    ranked.filter((r) => r.score >= minScore).map((r) => `${r.score.toFixed(3)}  ${r.line}`),
     opts
   )
+  process.exit(0)
 }

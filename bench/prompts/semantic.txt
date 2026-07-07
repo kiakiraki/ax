@@ -1,0 +1,1 @@
+tickets.txt in the current directory contains 2000 customer support messages, one per line, each prefixed with a ticket id like [T10123]. Find the messages that are complaints about shipping/delivery problems (positive feedback about shipping does NOT count). Report: (1) how many such complaints there are, (2) five example complaints quoted with their ticket ids.

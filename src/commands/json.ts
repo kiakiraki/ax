@@ -58,5 +58,5 @@ export async function json(argv: string[]) {
     }
   }
 
-  emitQueryResult(runQuery(root, path), flags)
+  await emitQueryResult(runQuery(root, path), flags)
 }

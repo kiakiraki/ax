@@ -124,7 +124,7 @@ export function toTsv(result: unknown): string[] {
 }
 
 // Shared output handling for the query commands.
-export function emitQueryResult(
+export async function emitQueryResult(
   result: unknown,
   flags: Record<string, string | boolean | undefined>
 ) {
@@ -149,6 +149,22 @@ export function emitQueryResult(
   }
 
   if (typeof flags.pick === 'string') result = pick(result, flags.pick)
+
+  // --like: rank array items by semantic similarity to a query.
+  if (typeof flags.like === 'string') {
+    if (!Array.isArray(result)) fail('--like needs an array result', 'iterate with [] first')
+    const { rankBySimilarity } = await import('./embed')
+    const strings = result.map((v) =>
+      typeOf(v) === 'object' || Array.isArray(v) ? JSON.stringify(v) : String(v)
+    )
+    const ranked = await rankBySimilarity(flags.like, strings)
+    const minScore = typeof flags.min === 'string' ? Number(flags.min) : -Infinity
+    emitLines(
+      ranked.filter((r) => r.score >= minScore).map((r) => `${r.score.toFixed(3)}  ${r.line}`),
+      opts
+    )
+    process.exit(0)
+  }
 
   // --freq: frequency table of the (picked) values — sort | uniq -c | sort -rn.
   if (flags.freq) {
@@ -210,4 +226,6 @@ export const queryFlagDefs = {
   where: { type: 'string' },
   pick: { type: 'string' },
   budget: { type: 'string' },
+  like: { type: 'string' },
+  min: { type: 'string' },
 } as const
