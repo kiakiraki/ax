@@ -96,6 +96,17 @@ border:2px solid var(--line);border-radius:16px}
 letter-spacing:.08em;text-transform:uppercase}
 .install code{font-size:13.5px;overflow-x:auto;white-space:nowrap}
 .install code::before{content:'$ ';color:var(--acc);font-weight:700}
+.bench table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);
+border:2px solid var(--line);border-radius:16px;overflow:hidden;font-size:13.5px}
+.bench th{font-size:11.5px;font-weight:800;color:var(--soft);letter-spacing:.06em;
+text-transform:uppercase;text-align:left;padding:12px 18px;border-bottom:2px solid var(--line)}
+.bench td{padding:12px 18px;border-bottom:1px solid var(--line)}
+.bench tr:last-child td{border-bottom:none}
+.bench td.delta{color:var(--acc);font-weight:800;font-family:var(--mono);white-space:nowrap}
+.bench td.num{font-family:var(--mono);white-space:nowrap}
+.bench .note{font-size:12.5px;color:var(--soft);margin-top:14px}
+.bench .note a{text-decoration:underline;text-underline-offset:3px}
+.bench .note a:hover{color:var(--acc)}
 .agents .cols{display:grid;grid-template-columns:minmax(0,1fr) 500px;gap:56px;align-items:center}
 .agents p{font-size:15px;color:#6b5a4c;margin:0}
 .agents .steps{max-width:none}
@@ -303,6 +314,45 @@ ax enc base64 -d 'aGVsbG8='`}</pre>
 ax time now --tz America/New_York`}</pre>
           </article>
         </div>
+      </section>
+
+      <section class='bench'>
+        <h2>Benchmarked, honestly.</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Same task, real agent sessions</th>
+              <th>without ax</th>
+              <th>with ax</th>
+              <th>delta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Log + JSON investigation (Opus 4.8, warmed-up session)</td>
+              <td class='num'>$0.180 · 57s</td>
+              <td class='num'>$0.103 · 27s</td>
+              <td class='delta'>−43% cost, −53% time</td>
+            </tr>
+            <tr>
+              <td>Same investigation on Haiku 4.5</td>
+              <td class='num'>$0.178 · 14 turns</td>
+              <td class='num'>$0.070 · 3 turns</td>
+              <td class='delta'>−61% cost</td>
+            </tr>
+            <tr>
+              <td>HTML scraping, 300 rows + aggregate</td>
+              <td class='num'>$0.88</td>
+              <td class='num'>$0.57</td>
+              <td class='delta'>−35% cost</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class='note'>
+          Both sides answered every question correctly, in every run. Where plain grep wins, the
+          skill tells the agent to use grep. Full method — including the losses —{' '}
+          <a href='https://github.com/yusukebe/ax/blob/main/bench/RESULTS.md'>in the repo</a>.
+        </p>
       </section>
 
       <section class='agents'>
