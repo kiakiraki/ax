@@ -52,6 +52,7 @@ export async function text(argv: string[]) {
     limit: { type: 'string' },
     all: { type: 'boolean' },
     help: { type: 'boolean' },
+    fresh: { type: 'boolean' },
     like: { type: 'string' },
     min: { type: 'string' },
     budget: { type: 'string' },

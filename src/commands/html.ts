@@ -89,6 +89,7 @@ export async function html(argv: string[]) {
     json: { type: 'boolean' },
     all: { type: 'boolean' },
     help: { type: 'boolean' },
+    fresh: { type: 'boolean' },
     outline: { type: 'boolean' },
     count: { type: 'boolean' },
     attr: { type: 'string' },

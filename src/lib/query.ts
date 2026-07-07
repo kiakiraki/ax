@@ -219,6 +219,7 @@ export const queryFlagDefs = {
   raw: { type: 'boolean' },
   all: { type: 'boolean' },
   help: { type: 'boolean' },
+  fresh: { type: 'boolean' },
   shape: { type: 'boolean' },
   freq: { type: 'boolean' },
   tsv: { type: 'boolean' },
