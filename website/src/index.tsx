@@ -373,7 +373,7 @@ ax url '.review' --like 'battery complaints'`}</pre>
         <div class='rows'>
           <div class='brow'>
             <span class='desc'>Markup drift — agent already knows ax (Opus 4.8)</span>
-            <span class='delta'>⅓ the cost</span>
+            <span class='delta'>−67% cost</span>
             <span class='nums'>
               without ax <b>$0.458</b> → with ax <b>$0.150</b>
             </span>
