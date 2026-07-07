@@ -1,124 +1,59 @@
 # ax
 
-**A scriptless multitool for AI agents.** Reach for `ax` instead of writing a throwaway `python3 <<'PY' ... re ... PY` script every time an agent needs to pull data out of HTML, JSON, or text.
+**The AI-era curl: fetch, discover, extract. One command.**
 
-```
-ax json api.json --shape                          # any JSON, summarized in one line
-ax json api.json '.users[]' --where "active == true && age > 40" --pick country --freq
-ax html page.html '.lesson' --row 'title=a, href=a@href, level=.cefr'
-ax yaml docker-compose.yml '.services[].image' --raw
-ax text app.log --grep ' INFO ' --extract '(\d+)ms' --all | ax stats
-ax enc jwt "$TOKEN"
-ax time 1783332078
+ax is what a coding agent should reach for instead of `curl` piped into a throwaway parsing script. It fetches a page, helps the agent understand its structure, and extracts structured data — locally, deterministically, with output shaped for a context window.
+
+```sh
+ax https://api.example.com/users                     # curl parity — but never silent
+ax https://example.com --outline                     # discover the page's structure
+ax https://example.com '.item' --row 'title=a, href=a@href'
+ax https://docs.example.com/guide --md --budget 800  # read docs as markdown
 ```
 
 ## Why
 
-Coding agents constantly reach for a one-off Python/regex script to scrape a page or reshape some JSON. That habit is a tax:
+Coding agents do one web loop constantly: **fetch → understand → extract**. Today that means `curl` (which prints _nothing_ on an empty body), eyeballing raw HTML in the context window (thousands of tokens), and a regex-over-HTML script that breaks the moment the markup shifts.
 
-- **Tokens** — the agent has to _author_ the whole script every time.
-- **Reliability** — regex-on-HTML breaks the moment the markup shifts, and each failure round-trips a stack trace back into the context.
-- **Noise** — scripts tend to dump everything, flooding the context window.
+ax replaces the loop with one command:
 
-`ax` replaces that with one line. It doesn't reinvent `jq` or an HTML parser — it wraps battle-tested libraries and adds an **agent-native layer** on top:
-
-- **Output is capped by default** (and never silently — it tells you what it hid).
-- **Errors are one structured line**, not a stack trace.
-- **`--help` is dirt cheap** so an agent can discover usage in a few tokens.
-- **JSON is the lingua franca**, so subcommands compose through pipes.
-- **Ships as a single binary** — no runtime, no deps to install.
+- **Fetch, never silent** — `{status, ok, ms, headers, body}` for every request. Empty bodies and error statuses still produce a full report. JSON bodies are parsed. Repeat fetches are cached for ~2 minutes, so probing is free.
+- **Discover, don't dump** — `--outline` shows a page's repeating structures; `--locate 'text'` answers "which selector holds this?" — no raw HTML ever hits the context.
+- **Extract, structured** — `--row 'title=a, href=a@href'` pulls multi-field rows in one call; `--table` turns `<table>` into keyed rows; `--where` filters with a safe expression language; `--like` ranks matches by _meaning_ (local embedding model, offline).
+- **Token-cheap by design** — results cap at 50 with a stderr note (never silent truncation), `--budget <tokens>` caps output by estimated tokens, `--tsv` emits header-once rows.
 
 ## Install
 
-Requires [Bun](https://bun.sh).
-
 ```sh
-bun install -g @yusukebe/ax   # or: npm install -g @yusukebe/ax
-ax --help
+curl -fsSL https://ax.yusuke.run/install | sh
 ```
 
-Or build a standalone single-file binary from source:
+Teach your agent: `npx skills add yusukebe/ax` — or have it run `ax agent-context`.
 
-```sh
-bun install
-bun run build        # produces ./ax (single binary via `bun build --compile`)
-cp ax ~/.local/bin/  # or anywhere on your PATH
-```
+## Why not htmlq / curl / Firecrawl?
 
-## Commands
+**htmlq is a selector; ax is the loop.** htmlq covers one step (CSS selector → text) and can't fetch, so every use marries it to curl. Multi-field extraction means running it N times and zipping by hand — exactly the moment agents give up and write python. ax does fetch + discovery + structured rows + tables + filtering in one binary, with agent-shaped output.
 
-### `ax html` — extract from HTML with CSS selectors
+**curl is silent.** An empty 200 body prints nothing; agents re-run it with `-i`, `-w`, guessing. ax always reports.
 
-No regex, no broken markup (powered by `linkedom`, standard DOM under the hood).
+**Firecrawl & friends return markdown blobs via metered cloud APIs.** ax is local, deterministic, zero-key, and returns _structure_ (rows, tables), not just prose. (For JavaScript-heavy SPAs you still want a browser tool — ax is the fast path for everything else.)
 
-```sh
-ax html page.html '.lesson a' --attr href      # an attribute, one per line
-ax html https://example.com 'h2' --text        # text content
-ax html page.html '.card' --json               # {text, html, attrs} per match
-```
+## Measured
 
-**`--row` — structured rows in one call.** The thing agents usually write Python for: pull several fields out of each repeating element at once.
+Real headless Claude Code sessions, same task, with and without ax — answers graded, both sides correct in every run:
 
-```sh
-ax html page.html '.lesson' --row 'title=a, href=a@href, level=.cefr, id=a@data-id'
-```
+| task                                        | without ax        | with ax              |
+| ------------------------------------------- | ----------------- | -------------------- |
+| investigation, warmed-up session (Opus 4.8) | $0.180 · 57s      | **$0.103 · 27s**     |
+| same task on Haiku 4.5                      | $0.178 · 14 turns | **$0.070 · 3 turns** |
+| HTML extraction, 300 rows                   | $0.88             | **$0.57**            |
 
-```json
-[
-  { "title": "Small talk", "href": "/lesson/1.htm", "level": "A2", "id": "1" },
-  { "title": "Ordering food", "href": "/lesson/2.htm", "level": "B1", "id": "2" }
-]
-```
+Full method — including the tasks ax _lost_ — in [bench/RESULTS.md](bench/RESULTS.md).
 
-Each field is `name=selector`. The selector is relative to the matched element; `@attr` reads an attribute; an empty selector (e.g. `id=@data-id`) targets the match itself.
+## The full flag reference
 
-**Discovery — explore an unknown page without dumping raw HTML.** This replaces the other reason agents reach for a script: spelunking the markup to figure out its structure.
-
-```sh
-ax html https://site.com/ --outline            # repeating tag.class + counts
-ax html https://site.com/ --locate 'BurgerBarn' # which selector holds this text?
-ax html page.html '.card' --count              # how many match a hypothesis
-```
-
-`--locate` answers with a **selector path**, not 600 bytes of raw HTML:
-
-```json
-[
-  {
-    "selector": "div.group5 > div.floatleft > a",
-    "match": "href=\"1449-Todd-BurgerBarn.htm\""
-  }
-]
-```
-
-The agent reads that and jumps straight to `--row` — no raw bytes ever hit the context window.
-
-### `ax json` — query JSON with a jq-subset path language
-
-```sh
-ax json data.json '.items[].name' --raw        # stream of values as lines
-ax json api.json '.data.users[0]'              # index / nested access
-cat x.json | ax json - --keys                  # list keys
-ax json data.json '.items' --len               # length
-```
-
-Supported path: `.`, `.key`, `.a.b.c`, `.arr[]` (iterate), `.arr[0]` (index), `.arr[].key`.
-
-### `ax text` — line-oriented grep / head / tail / count
-
-```sh
-ax text app.log --grep 'ERROR|WARN' --count
-ax text README.md --head 20
-cat data.txt | ax text - --grep '^\d+' -i
-```
-
-## Conventions shared by every command
-
-- **Source** is a file path, a URL (`http(s)://`), or `-` for stdin.
-- **`--limit <n>`** caps results (default 50); **`--all`** removes the cap.
-- Results over the cap print a `note:` on stderr — capping is never silent.
-- Errors go to stderr as a single `ax: error: ...` line and exit non-zero.
+Run `ax --help`, or `ax agent-context` for the agent-oriented playbook (also served at [ax.yusuke.run/llms.txt](https://ax.yusuke.run/llms.txt)).
 
 ## Built with
 
-[Bun](https://bun.sh) — `Bun.file` / `Bun.stdin` for I/O, built-in `fetch` for URLs, `util.parseArgs` for flags, and `bun build --compile` for the single-file binary. HTML parsing uses `linkedom` (standard DOM API). Formatted with `oxfmt`.
+[Bun](https://bun.sh) (single-file binary via `bun build --compile`), [linkedom](https://github.com/WebReflection/linkedom) for standard-DOM parsing, [onnxruntime-web](https://onnxruntime.ai/) + quantized MiniLM for offline `--like`. The multi-tool era of ax (json/yaml/text/stats/enc/time subcommands) lives on the [`toolkit`](https://github.com/yusukebe/ax/tree/toolkit) branch.

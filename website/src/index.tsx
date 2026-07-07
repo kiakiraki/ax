@@ -152,26 +152,26 @@ const Page = () => (
     <head>
       <meta charset='utf-8' />
       <meta name='viewport' content='width=device-width, initial-scale=1' />
-      <title>ax — a scriptless multitool for AI agents</title>
+      <title>ax — the AI-era curl</title>
       <meta
         name='description'
-        content='One binary that replaces the throwaway scripts your agent keeps writing. Extract HTML, query JSON/YAML, process text — token-cheap by design.'
+        content='Fetch, discover, extract — one command. The web tool coding agents reach for instead of curl + throwaway parsing scripts.'
       />
       <meta property='og:type' content='website' />
       <meta property='og:url' content='https://ax.yusuke.run/' />
-      <meta property='og:title' content='ax — a scriptless multitool for AI agents' />
+      <meta property='og:title' content='ax — the AI-era curl' />
       <meta
         property='og:description'
-        content='One binary that replaces the throwaway scripts your agent keeps writing. Extract HTML, query JSON/YAML, process text — token-cheap by design.'
+        content='Fetch, discover, extract — one command. The web tool coding agents reach for instead of curl + throwaway parsing scripts.'
       />
       <meta property='og:image' content='https://ax.yusuke.run/og.png' />
       <meta property='og:image:width' content='1200' />
       <meta property='og:image:height' content='630' />
       <meta name='twitter:card' content='summary_large_image' />
-      <meta name='twitter:title' content='ax — a scriptless multitool for AI agents' />
+      <meta name='twitter:title' content='ax — the AI-era curl' />
       <meta
         name='twitter:description'
-        content='One binary that replaces the throwaway scripts your agent keeps writing.'
+        content='Fetch, discover, extract — one command for coding agents.'
       />
       <meta name='twitter:image' content='https://ax.yusuke.run/og.png' />
       <link
@@ -196,10 +196,11 @@ const Page = () => (
       <div class='intro'>
         <div>
           <h1>
-            One binary.
+            The AI-era <span class='strike'>curl</span>
             <br />
-            No more <span class='strike'>throwaway scripts</span>.<br />
-            Just <span class='mark'>ax</span>.
+            <span class='mark'>ax</span> — fetch, discover,
+            <br />
+            extract. One command.
           </h1>
           <p class='sub'>
             A scriptless multitool for AI agents. Extract from HTML, query JSON and YAML, process
@@ -231,15 +232,15 @@ const Page = () => (
             </div>
             <pre
               dangerouslySetInnerHTML={{
-                __html: `<span class="p">$</span> ax html page.html '.lesson' \\
+                __html: `<span class="p">$</span> ax page.html '.lesson' \\
     --row 'title=a, level=.cefr'
 [
   { "title": "Small talk",
     "level": "A2" },
   ...
 ]
-<span class="p">$</span> ax enc jwt "$TOKEN"
-{ "payload": { "name": "yusuke" } }`,
+<span class="p">$</span> ax https://site.com --outline
+   50  div.lesson`,
               }}
             />
           </div>
@@ -255,7 +256,7 @@ const Page = () => (
           </div>
           <div class='pane'>
             <div class='tag'>after — one line</div>
-            <pre>{`ax html page.html '.lesson' \\
+            <pre>{`ax page.html '.lesson' \\
   --row 'title=a, href=a@href, level=.cefr'
 
 [
@@ -269,51 +270,34 @@ const Page = () => (
       </section>
 
       <section>
-        <h2>Six commands. JSON is the lingua franca.</h2>
+        <h2>Fetch. Discover. Extract.</h2>
         <div class='grid'>
           <article>
             <div class='num'>01</div>
-            <h3>ax html</h3>
-            <p>CSS selectors, structured rows, tables, and discovery for unknown pages.</p>
-            <pre>{`ax html url '.card' --row 'title=a'
-ax html url 'table' --table
-ax html url --outline / --locate`}</pre>
+            <h3>fetch</h3>
+            <p>curl parity, but never silent: every request yields a full structured report.</p>
+            <pre>{`ax https://api.site.com/users
+→ { "status": 200, "ok": true,
+    "ms": 84, "headers": {...},
+    "body": [...] }`}</pre>
           </article>
           <article>
             <div class='num'>02</div>
-            <h3>ax json</h3>
-            <p>A jq-subset path language plus --where expressions.</p>
-            <pre>{`ax json api.json '.items[].name'
-ax json api.json '.users[]' \\
-  --where 'age > 20'`}</pre>
+            <h3>discover</h3>
+            <p>Understand an unknown page without dumping raw HTML into context.</p>
+            <pre>{`ax https://site.com --outline
+   50  div.lesson
+ax https://site.com --locate 'text'
+ax https://site.com '.card' --count`}</pre>
           </article>
           <article>
             <div class='num'>03</div>
-            <h3>ax yaml</h3>
-            <p>Same paths, same flags — for compose, CI, k8s configs.</p>
-            <pre>{`ax yaml compose.yml \\
-  '.services[].image' --raw`}</pre>
-          </article>
-          <article>
-            <div class='num'>04</div>
-            <h3>ax text</h3>
-            <p>grep, extract, frequency tables — the shell idioms, built in.</p>
-            <pre>{`ax text app.log --grep 'ERROR' --count
-ax text a.css --extract '#\\w{6}' --freq`}</pre>
-          </article>
-          <article>
-            <div class='num'>05</div>
-            <h3>ax enc</h3>
-            <p>base64, url, hex, JWT peek, hashes. No more python -c.</p>
-            <pre>{`ax enc jwt "$TOKEN"
-ax enc base64 -d 'aGVsbG8='`}</pre>
-          </article>
-          <article>
-            <div class='num'>06</div>
-            <h3>ax time</h3>
-            <p>epoch ⇔ ISO ⇔ timezones ⇔ relative, in one call.</p>
-            <pre>{`ax time 1783332078
-ax time now --tz America/New_York`}</pre>
+            <h3>extract</h3>
+            <p>CSS selectors → structured rows. Drift-proof where regex breaks.</p>
+            <pre>{`ax url '.item' --row 'title=a, href=a@href'
+ax url 'table' --table --where 'Stars > 100'
+ax url --md --budget 800   # docs as markdown
+ax url '.review' --like 'battery complaints'`}</pre>
           </article>
         </div>
       </section>
@@ -322,25 +306,25 @@ ax time now --tz America/New_York`}</pre>
         <h2>Benchmarked, honestly.</h2>
         <div class='rows'>
           <div class='brow'>
-            <span class='desc'>Log + JSON investigation (Opus 4.8, warmed-up session)</span>
+            <span class='desc'>Live website extraction (real site, Opus 4.8)</span>
             <span class='nums'>
-              $0.180 · 57s → <b>$0.103 · 27s</b>
+              $0.332 · 41s → <b>$0.303 · 36s</b>
             </span>
-            <span class='delta'>−43% cost · −53% time</span>
+            <span class='delta'>wins on cost and time</span>
           </div>
           <div class='brow'>
-            <span class='desc'>Same investigation on Haiku 4.5</span>
+            <span class='desc'>Two pages with markup drift (regex-breaker)</span>
             <span class='nums'>
-              $0.178 · 14 turns → <b>$0.070 · 3 turns</b>
+              $0.664 → <b>$0.338</b>
             </span>
-            <span class='delta'>−61% cost</span>
+            <span class='delta'>−49% cost</span>
           </div>
           <div class='brow'>
-            <span class='desc'>HTML scraping, 300 rows + aggregate</span>
+            <span class='desc'>Clean extraction, 300 rows + aggregate</span>
             <span class='nums'>
-              $0.88 → <b>$0.57</b>
+              $0.267 · 40s → <b>$0.250 · 29s</b>
             </span>
-            <span class='delta'>−35% cost</span>
+            <span class='delta'>−28% time</span>
           </div>
         </div>
         <p class='note'>

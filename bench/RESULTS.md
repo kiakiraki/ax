@@ -161,3 +161,17 @@ Every loss produced a fix:
 - **The multiplier lives on budget models**: ax's benefit is inversely
   proportional to model strength (−8% on Fable, −14% on Sonnet, −61% on
   Haiku). Haiku + ax matches frontier-alone output at **1/9 the cost**.
+
+## Single-command ax (the AI-era curl refocus) — re-measured
+
+After the refocus (`ax <url|file> [selector]`, fetch cache, rewritten skill),
+the three web-arena benches re-run cold on Opus (baselines unchanged):
+
+| bench            | A: baseline  | old multi-command B        | **single-command B**                    |
+| ---------------- | ------------ | -------------------------- | --------------------------------------- |
+| clean extraction | $0.267 / 40s | $0.262 / 29s               | $0.250 / **28.7s**                      |
+| markup drift     | $0.664 / 42s | $0.35–0.55 (high variance) | **$0.338 / 58s (−49%)**                 |
+| live website     | $0.332 / 41s | $0.372 / 76s               | **$0.303 / 35.6s — first live-web win** |
+
+All correct. The focused surface + fetch cache + tighter skill closed the
+live-web gap that the toolkit era never won.
