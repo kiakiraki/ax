@@ -372,35 +372,31 @@ ax url '.review' --like 'battery complaints'`}</pre>
         <h2>Benchmarked, honestly.</h2>
         <div class='rows'>
           <div class='brow'>
-            <span class='desc'>
-              Markup drift across two pages — where regex scripts break (Opus 4.8)
-            </span>
+            <span class='desc'>Markup drift — agent already knows ax (Opus 4.8)</span>
             <span class='delta'>⅓ the cost</span>
             <span class='nums'>
               without ax <b>$0.458</b> → with ax <b>$0.150</b>
             </span>
           </div>
           <div class='brow'>
-            <span class='desc'>
-              Same drift task, first encounter — $0.664 → $0.282 (−58%) · on Haiku 4.5
+            <span class='desc'>Markup drift — first encounter (Opus 4.8)</span>
+            <span class='delta'>−58% cost</span>
+            <span class='nums'>
+              without ax <b>$0.664</b> → with ax <b>$0.282</b>
             </span>
+          </div>
+          <div class='brow'>
+            <span class='desc'>Same drift task on Haiku 4.5</span>
             <span class='delta'>−46% cost</span>
             <span class='nums'>
               without ax <b>$0.093</b> → with ax <b>$0.051</b>
             </span>
           </div>
           <div class='brow'>
-            <span class='desc'>Live website extraction (real site)</span>
+            <span class='desc'>Live website extraction (real site, Opus 4.8)</span>
             <span class='delta'>−11% cost</span>
             <span class='nums'>
               without ax <b>$0.332 · 41s</b> → with ax <b>$0.295 · 39s</b>
-            </span>
-          </div>
-          <div class='brow'>
-            <span class='desc'>Clean extraction, 300 rows + aggregate</span>
-            <span class='delta'>−28% time</span>
-            <span class='nums'>
-              without ax <b>$0.267 · 40s</b> → with ax <b>$0.250 · 29s</b>
             </span>
           </div>
         </div>
