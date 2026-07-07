@@ -1,0 +1,1 @@
+Using only the terminal, fetch https://www.elllo.org/english/1401/index.htm (a real lesson-list page) and report: (1) how many lessons the page lists, (2) the lesson page filename (href) and cover image filename for the first three lessons. Be accurate — the page has navigation links and promos that are not lessons.

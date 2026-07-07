@@ -9,10 +9,13 @@ import { pathToFileURL } from 'node:url'
 
 const CACHE = join(homedir(), '.cache', 'ax')
 const ORT_VERSION = '1.27.0'
-const HF = 'https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main'
+// Overridable for experiments: any BERT-WordPiece embedding model in ONNX.
+const MODEL = process.env.AX_EMBED_MODEL ?? 'Xenova/all-MiniLM-L6-v2'
+const SLUG = MODEL.replace('/', '--')
+const HF = `https://huggingface.co/${MODEL}/resolve/main`
 const ASSETS = [
-  { file: 'minilm-q8.onnx', url: `${HF}/onnx/model_quantized.onnx`, note: 'model (~23MB)' },
-  { file: 'minilm-tokenizer.json', url: `${HF}/tokenizer.json`, note: 'tokenizer' },
+  { file: `${SLUG}-q8.onnx`, url: `${HF}/onnx/model_quantized.onnx`, note: 'model' },
+  { file: `${SLUG}-tokenizer.json`, url: `${HF}/tokenizer.json`, note: 'tokenizer' },
   {
     file: 'ort-wasm-simd-threaded.wasm',
     url: `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/ort-wasm-simd-threaded.wasm`,
@@ -99,9 +102,9 @@ export function getEmbedder(): Promise<Embedder> {
       wasm: pathToFileURL(join(CACHE, 'ort-wasm-simd-threaded.wasm')).href,
       mjs: pathToFileURL(join(CACHE, 'ort-wasm-simd-threaded.mjs')).href,
     }
-    const tokenizer = new WordPiece(await Bun.file(join(CACHE, 'minilm-tokenizer.json')).json())
+    const tokenizer = new WordPiece(await Bun.file(join(CACHE, `${SLUG}-tokenizer.json`)).json())
     // Pass bytes, not a path: ort-web would try to fetch() a filesystem path.
-    const modelBytes = new Uint8Array(await Bun.file(join(CACHE, 'minilm-q8.onnx')).arrayBuffer())
+    const modelBytes = new Uint8Array(await Bun.file(join(CACHE, `${SLUG}-q8.onnx`)).arrayBuffer())
     const session = await ort.InferenceSession.create(modelBytes, {
       executionProviders: ['wasm'],
     })
