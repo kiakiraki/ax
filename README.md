@@ -42,11 +42,11 @@ Teach your agent: `npx skills add yusukebe/ax` — or have it run `ax agent-cont
 
 Real headless Claude Code sessions, same task, with and without ax — answers graded, both sides correct in every run:
 
-| task                                        | without ax        | with ax              |
-| ------------------------------------------- | ----------------- | -------------------- |
-| investigation, warmed-up session (Opus 4.8) | $0.180 · 57s      | **$0.103 · 27s**     |
-| same task on Haiku 4.5                      | $0.178 · 14 turns | **$0.070 · 3 turns** |
-| HTML extraction, 300 rows                   | $0.88             | **$0.57**            |
+| task                                       | without ax   | with ax           |
+| ------------------------------------------ | ------------ | ----------------- |
+| live website extraction (real site)        | $0.332 · 41s | **$0.303 · 36s**  |
+| two pages with markup drift (breaks regex) | $0.664       | **$0.338 (−49%)** |
+| clean extraction, 300 rows + aggregate     | $0.267 · 40s | **$0.250 · 29s**  |
 
 Full method — including the tasks ax _lost_ — in [bench/RESULTS.md](bench/RESULTS.md).
 
