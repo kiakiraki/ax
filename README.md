@@ -38,6 +38,21 @@ Teach your agent: `npx skills add yusukebe/ax` — or have it run `ax agent-cont
 
 **Firecrawl & friends return markdown blobs via metered cloud APIs.** ax is local, deterministic, zero-key, and returns _structure_ (rows, tables), not just prose. (For JavaScript-heavy SPAs you still want a browser tool — ax is the fast path for everything else.)
 
+|                                                | throwaway python | curl + htmlq | ax  |
+| ---------------------------------------------- | :--------------: | :----------: | :-: |
+| fetch with a full report (status/headers/ms)   |        △ *write it* |      ✗       |  ✓  |
+| structure discovery (`--outline` / `--locate`) |        ✗         |      ✗       |  ✓  |
+| CSS-selector extraction                        |   △ *needs bs4*  |      ✓       |  ✓  |
+| multi-field rows in one call (`--row`)         |   △ *write it*   |      ✗       |  ✓  |
+| `<table>` → keyed rows                         |   △ *write it*   |      ✗       |  ✓  |
+| survives markup drift                          |   ✗ *(regex)*    |      ✓       |  ✓  |
+| semantic ranking (`--like`), offline           |        ✗         |      ✗       |  ✓  |
+| page → readable markdown (`--md`)              |        ✗         |      ✗       |  ✓  |
+| token-shaped output (caps, `--budget`, notes)  |        ✗         |      ✗       |  ✓  |
+| zero code authored per task                    |        ✗         |      ✓       |  ✓  |
+
+(△ = possible, but the agent writes and debugs the code every time — that authoring cost is the whole point.)
+
 ## Measured
 
 Real headless Claude Code sessions, same task, with and without ax — answers graded, both sides correct in every run:
