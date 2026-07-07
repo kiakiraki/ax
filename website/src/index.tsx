@@ -375,9 +375,9 @@ ax url '.review' --like 'battery complaints'`}</pre>
             <span class='desc'>
               Markup drift across two pages — where regex scripts break (Opus 4.8)
             </span>
-            <span class='delta'>½ the cost</span>
+            <span class='delta'>−58% cost</span>
             <span class='nums'>
-              without ax <b>$0.664</b> → with ax <b>$0.338</b>
+              without ax <b>$0.664</b> → with ax <b>$0.282</b>
             </span>
           </div>
           <div class='brow'>
@@ -389,9 +389,9 @@ ax url '.review' --like 'battery complaints'`}</pre>
           </div>
           <div class='brow'>
             <span class='desc'>Live website extraction (real site)</span>
-            <span class='delta'>−9% cost · −13% time</span>
+            <span class='delta'>−11% cost</span>
             <span class='nums'>
-              without ax <b>$0.332 · 41s</b> → with ax <b>$0.303 · 36s</b>
+              without ax <b>$0.332 · 41s</b> → with ax <b>$0.295 · 39s</b>
             </span>
           </div>
           <div class='brow'>

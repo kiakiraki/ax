@@ -196,3 +196,14 @@ Haiku 4.5, markup-drift task, both correct: A $0.093 / 26s vs B **$0.051 /
 21.2s (−46%)**. Also shipped: --row/--table now print `N rows extracted` +
 empty-field counts on stderr, killing the verification-probe habit at the
 tool level.
+
+### TSV-default + row-stats era (re-run, Opus cold)
+
+| bench         | A            | B                                                                           |
+| ------------- | ------------ | --------------------------------------------------------------------------- |
+| markup drift  | $0.664       | **$0.282 (−58%)** — the agent quoted the row-stats note as its verification |
+| live web      | $0.332 / 41s | **$0.295 / 39s**                                                            |
+| clean extract | $0.267 / 40s | $0.354 / **21.6s / 3 turns** (fastest ever; cost up from an --all ingest)   |
+
+TSV rows (57% fewer chars) + the `N rows extracted, no empty fields` note
+removed the verification turns exactly as designed.
