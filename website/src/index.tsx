@@ -45,7 +45,7 @@ box-shadow:0 6px 0 var(--shadow);overflow:hidden}
 .term .bar{display:flex;gap:6px;padding:10px 14px;border-bottom:2px solid var(--line);background:#fff4e8}
 .term .dot{width:10px;height:10px;border-radius:50%;background:var(--shadow)}
 .term .dot:first-child{background:var(--acc)}
-.term pre{margin:0;padding:14px 16px;font-size:11.5px;line-height:1.65;overflow-x:auto}
+.term pre{margin:0;padding:14px 16px;font-size:11px;line-height:1.65;overflow-x:auto}
 .term .p{color:var(--acc);font-weight:700}
 .term .c,.pane .c{color:var(--soft)}
 h1{font-size:clamp(34px,6.6vw,64px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin:0 0 22px;max-width:640px}
@@ -243,9 +243,9 @@ const Page = () => (
               dangerouslySetInnerHTML={{
                 __html: `<span class="p">$</span> ax https://site.com '.lesson' \\
     --row 'title=a, level=.cefr'
-title\tlevel
-Small talk\tA2
-Directions\tA2
+title        level
+Small talk   A2
+Directions   A2
 ...
 <span class="c">ax: note: 50 rows extracted, no empty fields</span>
 <span class="p">$</span> ax https://site.com --outline
@@ -270,9 +270,9 @@ Directions\tA2
                 __html: `ax https://site.com '.lesson' \\
   --row 'title=a, href=a@href, level=.cefr'
 
-title\thref\tlevel
-Small talk\t/lesson/1.htm\tA2
-Directions\t/lesson/2.htm\tA2
+title        href            level
+Small talk   /lesson/1.htm   A2
+Directions   /lesson/2.htm   A2
 ...
 <span class="c">ax: note: 50 rows extracted, no empty fields</span>`,
               }}
