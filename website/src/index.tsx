@@ -51,10 +51,7 @@ box-shadow:0 6px 0 var(--shadow);overflow:hidden}
 h1{font-size:clamp(34px,6.6vw,64px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin:0 0 22px;max-width:640px}
 .mark{background:var(--acc);color:#fff;padding:.02em .3em;border-radius:14px;display:inline-block;transform:rotate(-2deg)}
 .strike{text-decoration:line-through;text-decoration-thickness:4px;text-decoration-color:var(--acc);color:var(--soft)}
-.sub{font-size:16.5px;max-width:540px;color:#6b5a4c;margin:0 0 14px}
-.fineprint{font-size:12.5px;color:var(--soft);max-width:540px;margin:0 0 28px}
-.selflearn{font-size:12.5px;color:var(--soft);margin:14px 0 0}
-.selflearn code{background:var(--acc-soft);border-radius:6px;padding:1px 6px;color:#c2410c}
+.sub{font-size:16.5px;max-width:540px;color:#6b5a4c;margin:0 0 32px}
 .scope{font-size:13px;color:var(--soft);margin:-14px 0 22px}
 .steps{display:flex;flex-direction:column;gap:12px;max-width:660px}
 .step{display:flex;align-items:center;gap:14px;background:var(--card);border:2px solid var(--line);
@@ -219,10 +216,6 @@ const Page = () => (
             Local HTTP and HTML I/O for coding agents. One command instead of curl + throwaway
             Python — structured, token-cheap, capped by default, never silent.
           </p>
-          <p class='fineprint'>
-            Not a full curl replacement — just the web-reading agents repeat all day: fetch,
-            inspect, locate, extract, bound output.
-          </p>
           <div class='steps'>
             <div class='step'>
               <span class='n'>1</span>
@@ -237,9 +230,6 @@ const Page = () => (
               <button data-copy={AGENT_PROMPT}>copy</button>
             </div>
           </div>
-          <p class='selflearn'>
-            Agents self-learn the CLI offline with <code>ax agent-context</code>.
-          </p>
         </div>
         <div class='hero-art'>
           <div class='mascot'>🪓</div>
