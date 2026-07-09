@@ -47,3 +47,11 @@ test('missing fields resolve to null, not a crash', () => {
   expect(compileWhere('nope == "x"')(row)).toBe(false)
   expect(compileWhere('nope == null')(row)).toBe(true)
 })
+
+test('backtick-quoted column names with spaces', () => {
+  const r = { 'Country or territory': 'Japan', 'Change(%)': '+0.5' }
+  expect(compileWhere('`Country or territory` ~ /Japan/')(r)).toBe(true)
+  expect(compileWhere('`Country or territory` == "Japan"')(r)).toBe(true)
+  expect(compileWhere('`Change(%)` ~ /\\+/')(r)).toBe(true)
+  expect(compileWhere('`Country or territory` == "Brazil"')(r)).toBe(false)
+})

@@ -8,7 +8,8 @@ import { fail } from './io'
 //
 // Grammar (precedence low→high): ||  &&  !  (== != ~ !~ > >= < <=)  primary
 // Primary: number, 'string', "string", /regex/flags, true/false/null,
-//          dot path (name, item.price, tags.length), parenthesised expr.
+//          dot path (name, item.price, tags.length), `column with spaces`,
+//          parenthesised expr.
 
 type Tok =
   | { t: 'op'; v: string }
@@ -62,6 +63,13 @@ function lex(src: string): Tok[] {
       const end = src.indexOf(c, i + 1)
       if (end === -1) fail(`unterminated string in expression: ${src.slice(i)}`)
       toks.push({ t: 'str', v: src.slice(i + 1, end) })
+      i = end + 1
+      continue
+    }
+    if (c === '`' /* quoted column name — for headers with spaces */) {
+      const end = src.indexOf('`', i + 1)
+      if (end === -1) fail(`unterminated \`column name\` in expression: ${src.slice(i)}`)
+      toks.push({ t: 'path', v: [src.slice(i + 1, end)] })
       i = end + 1
       continue
     }

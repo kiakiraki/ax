@@ -26,7 +26,8 @@ Skill: npx skills add yusukebe/ax   Source: https://github.com/yusukebe/ax
     ax URL 'table' --table                 <table> → rows keyed by headers
     ax URL '.item a' --attr href | --text | --html
     ax URL --md                            readable page as markdown (docs!)
-    --where 'price > 100 && name ~ /^foo/i'    filter rows (safe expr, no eval)
+    --where 'price > 100 && name ~ /^foo/i'    filter rows (safe expr, no eval;
+      backtick column names with spaces: `Country or territory` ~ /Japan/)
 
 ## Output rules
 

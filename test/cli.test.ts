@@ -100,3 +100,12 @@ test('cap: default limit with stderr note', () => {
   expect(r.out.split('\n')).toHaveLength(50)
   expect(r.err).toContain('hidden')
 })
+
+test('0 rows after --where is announced, never silent', () => {
+  writeFileSync(
+    join(dir, 'zero.html'),
+    '<table class="t"><tr><th>Name</th><th>Stars</th></tr><tr><td>a</td><td>5</td></tr></table>'
+  )
+  const r = ax(['zero.html', '.t', '--table', '--where', 'Stars > 100'])
+  expect(r.err).toContain('0 of 1 rows match --where')
+})

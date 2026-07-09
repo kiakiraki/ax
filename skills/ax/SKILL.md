@@ -18,6 +18,7 @@ ax https://site.example --locate 'some text'         # discover: which selector 
 ax https://site.example '.card' --count              # confirm a hypothesis
 ax https://site.example '.card' --row 'title=a, href=a@href, id=@data-id'
 ax https://site.example 'table' --table --where 'Stars >= 30000'
+ax https://site.example 'table' --table --where '`Col With Spaces` ~ /x/'
 ax https://docs.site.example/guide --md --budget 800 # read docs as markdown
 ```
 

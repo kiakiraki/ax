@@ -14,6 +14,7 @@ fetch (no selector — curl parity, but never silent):
   ax https://api.example.com/users        {status, ok, ms, headers, body}
   -X, --method <m>   -H, --header <k: v>   -d, --data <body>
   JSON bodies are parsed; repeat fetches of one URL are cached ~2min (--fresh)
+  noisy response headers are omitted (announced; --headers shows all)
 
 discover (unknown page? never dump raw HTML):
   --outline          repeating tag.class signatures with counts
@@ -26,7 +27,8 @@ extract (selector — CSS, structured):
   --table            <table> → rows keyed by headers
   --text | --attr <name> | --html             simpler per-match output
   --md               readable page content as markdown (for reading docs)
-  --where <expr>     filter rows: price > 100 && name ~ /^foo/i  (no eval)
+  --where <expr>     filter rows: price > 100 && name ~ /^foo/i  (no eval;
+                     \`col name\` for headers with spaces)
 
 output shape (token-cheap by design):
   rows default to TSV (header once, ≈40% of JSON tokens); --json for JSON rows
@@ -62,6 +64,18 @@ function parseRowSpec(spec: string): Field[] {
       return { name, sel, attr }
     })
 }
+
+// Fetch-report headers an agent acts on; the rest are noise (--headers shows all).
+const KEEP_HEADERS = new Set([
+  'content-type',
+  'content-length',
+  'location',
+  'retry-after',
+  'www-authenticate',
+  'cache-control',
+  'etag',
+  'last-modified',
+])
 
 const collapse = (s: string) => s.trim().replace(/\s+/g, ' ')
 
@@ -126,6 +140,7 @@ export async function root(argv: string[]) {
   const { _, flags } = parseArgs(argv, {
     help: { type: 'boolean' },
     fresh: { type: 'boolean' },
+    headers: { type: 'boolean' },
     all: { type: 'boolean' },
     text: { type: 'boolean' },
     html: { type: 'boolean' },
@@ -200,13 +215,24 @@ export async function root(argv: string[]) {
         /* keep text */
       }
     }
+    const allHeaders = Object.fromEntries(res.headers.entries())
+    let reportHeaders = allHeaders
+    let omitted = 0
+    if (flags.headers !== true) {
+      reportHeaders = {}
+      for (const [k, v] of Object.entries(allHeaders)) {
+        if (KEEP_HEADERS.has(k) || k.startsWith('x-ratelimit')) reportHeaders[k] = v
+        else omitted++
+      }
+    }
     process.stdout.write(
       JSON.stringify(
         {
           status: res.status,
           ok: res.ok,
           ms,
-          headers: Object.fromEntries(res.headers.entries()),
+          headers: reportHeaders,
+          ...(omitted > 0 ? { headers_omitted: `${omitted} (--headers for all)` } : {}),
           body,
           ...(truncated
             ? {
@@ -298,9 +324,10 @@ export async function root(argv: string[]) {
       return { headers, rows }
     }
     const parsed = targets.map(parse)
+    const beforeWhere = parsed.length === 1 ? parsed[0]!.rows.length : 0
     if (wherePred) for (const p of parsed) p.rows = p.rows.filter(wherePred)
     const tableResult = parsed.length === 1 ? parsed[0]!.rows : parsed
-    if (parsed.length === 1) rowStats(parsed[0]!.rows)
+    if (parsed.length === 1) rowStats(parsed[0]!.rows, wherePred ? beforeWhere : undefined)
     if (flags.json || parsed.length > 1) return emitJson(tableResult, opts)
     return emitLines(toTsv(tableResult), opts)
   }
@@ -324,7 +351,7 @@ export async function root(argv: string[]) {
       return obj
     })
     const rowResult = wherePred ? rows.filter(wherePred) : rows
-    rowStats(rowResult)
+    rowStats(rowResult, wherePred ? rows.length : undefined)
     if (flags.json) return emitJson(rowResult, opts)
     return emitLines(toTsv(rowResult), opts)
   }
@@ -358,8 +385,15 @@ export async function root(argv: string[]) {
 
 // Completeness report for extractions: row count + per-field null counts on
 // stderr, so the agent never needs a separate verification probe.
-function rowStats(rows: Record<string, string | null>[]) {
-  if (rows.length === 0) return
+function rowStats(rows: Record<string, string | null>[], beforeWhere?: number) {
+  if (rows.length === 0) {
+    process.stderr.write(
+      beforeWhere !== undefined
+        ? `ax: note: 0 of ${beforeWhere} rows match --where\n`
+        : 'ax: note: 0 rows extracted — check the selector and field spec\n'
+    )
+    return
+  }
   const nulls: string[] = []
   for (const key of Object.keys(rows[0]!)) {
     const n = rows.filter((r) => r[key] === null || r[key] === '').length
