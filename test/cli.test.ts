@@ -100,4 +100,3 @@ test('cap: default limit with stderr note', () => {
   expect(r.out.split('\n')).toHaveLength(50)
   expect(r.err).toContain('hidden')
 })
-

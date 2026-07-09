@@ -56,12 +56,12 @@ Teach your agent: `npx skills add yusukebe/ax` — or have it run `ax agent-cont
 
 Real headless Claude Code sessions, same task, with and without ax — answers graded, both sides correct in every run:
 
-| task (Opus 4.8, agent already knows ax)     | without ax   | with ax                 |
-| ------------------------------------------- | ------------ | ----------------------- |
-| two pages with markup drift (breaks regex)  | $0.458       | **$0.150 (−67%)**       |
-| clean extraction from a 60-item catalog     | $0.296 · 24s | **$0.104 · 14s (−65%)** |
-| live website, decoy markup (median of 3)    | $0.248       | **$0.191 (−23%)**       |
-| markup drift, agent's first-ever use of ax  | $0.664       | **$0.282 (−58%)**       |
+| task (Opus 4.8, agent already knows ax)    | without ax   | with ax                 |
+| ------------------------------------------ | ------------ | ----------------------- |
+| two pages with markup drift (breaks regex) | $0.458       | **$0.150 (−67%)**       |
+| clean extraction from a 60-item catalog    | $0.296 · 24s | **$0.104 · 14s (−65%)** |
+| live website, decoy markup (median of 3)   | $0.248       | **$0.191 (−23%)**       |
+| markup drift, agent's first-ever use of ax | $0.664       | **$0.282 (−58%)**       |
 
 Full method — including the runs ax _lost_ — in [bench/RESULTS.md](bench/RESULTS.md).
 

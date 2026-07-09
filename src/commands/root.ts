@@ -369,4 +369,3 @@ function rowStats(rows: Record<string, string | null>[]) {
     `ax: note: ${rows.length} rows extracted${nulls.length ? ` — check: ${nulls.join(', ')}` : ', no empty fields'}\n`
   )
 }
-

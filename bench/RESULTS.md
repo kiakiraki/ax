@@ -236,9 +236,9 @@ table, run n≥3 per cell and average. Kept here so we don't fool ourselves.
 
 Clean extraction (b2-lessons fixture, 60 B2 lessons):
 
-|               | python (tool-native)   | ax (tool-warm)                          |
-| ------------- | ---------------------- | --------------------------------------- |
-| clean extract | $0.296 / 23.9s / 3t    | **$0.104 / 13.8s / 3t (−65% cost)**     |
+|               | python (tool-native) | ax (tool-warm)                      |
+| ------------- | -------------------- | ----------------------------------- |
+| clean extract | $0.296 / 23.9s / 3t  | **$0.104 / 13.8s / 3t (−65% cost)** |
 
 Live web (elllo.org, real internet, 50 lessons + decoy divs), n=3:
 
