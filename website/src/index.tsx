@@ -47,6 +47,7 @@ box-shadow:0 6px 0 var(--shadow);overflow:hidden}
 .term .dot:first-child{background:var(--acc)}
 .term pre{margin:0;padding:14px 16px;font-size:11.5px;line-height:1.65;overflow-x:auto}
 .term .p{color:var(--acc);font-weight:700}
+.term .c,.pane .c{color:var(--soft)}
 h1{font-size:clamp(34px,6.6vw,64px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin:0 0 22px;max-width:640px}
 .mark{background:var(--acc);color:#fff;padding:.02em .3em;border-radius:14px;display:inline-block;transform:rotate(-2deg)}
 .strike{text-decoration:line-through;text-decoration-thickness:4px;text-decoration-color:var(--acc);color:var(--soft)}
@@ -59,7 +60,7 @@ width:30px;height:30px;border-radius:999px;background:var(--acc);color:#fff;
 font-weight:800;font-size:14px;font-family:var(--mono)}
 .step .what{flex-shrink:0;font-size:12px;font-weight:800;color:var(--soft);width:88px;
 letter-spacing:.06em;text-transform:uppercase}
-.step code{font-size:13px;overflow-x:auto;white-space:nowrap;flex:1;color:var(--ink)}
+.step code{font-size:13px;white-space:normal;overflow-wrap:anywhere;flex:1;color:var(--ink)}
 .step button{flex-shrink:0;border:none;border-radius:999px;padding:9px 16px;font-size:12.5px;
 font-weight:700;font-family:var(--round);background:var(--acc);color:#fff;cursor:pointer;
 box-shadow:0 3px 0 #d94a10;transition:.15s}
@@ -211,9 +212,9 @@ const Page = () => (
             extract. One command.
           </h1>
           <p class='sub'>
-            A scriptless multitool for AI agents. Extract from HTML, query JSON and YAML, process
-            text, decode and convert — in one line instead of a python heredoc. Token-cheap output,
-            structured errors, capped by default.
+            HTTP and HTML for AI agents. Fetch with a structured report, understand a page without
+            dumping it into context, extract clean rows with CSS selectors — one line instead of
+            curl plus a python heredoc. Token-cheap, capped by default, never silent.
           </p>
           <div class='steps'>
             <div class='step'>
@@ -242,11 +243,11 @@ const Page = () => (
               dangerouslySetInnerHTML={{
                 __html: `<span class="p">$</span> ax https://site.com '.lesson' \\
     --row 'title=a, level=.cefr'
-[
-  { "title": "Small talk",
-    "level": "A2" },
-  ...
-]
+title\tlevel
+Small talk\tA2
+Directions\tA2
+...
+<span class="c">ax: note: 50 rows extracted, no empty fields</span>
 <span class="p">$</span> ax https://site.com --outline
    50  div.lesson`,
               }}
@@ -264,15 +265,18 @@ const Page = () => (
           </div>
           <div class='pane'>
             <div class='tag'>after — one line</div>
-            <pre>{`ax https://site.com '.lesson' \\
+            <pre
+              dangerouslySetInnerHTML={{
+                __html: `ax https://site.com '.lesson' \\
   --row 'title=a, href=a@href, level=.cefr'
 
-[
-  { "title": "Small talk",
-    "href": "/lesson/1.htm",
-    "level": "A2" },
-  ...
-]`}</pre>
+title\thref\tlevel
+Small talk\t/lesson/1.htm\tA2
+Directions\t/lesson/2.htm\tA2
+...
+<span class="c">ax: note: 50 rows extracted, no empty fields</span>`,
+              }}
+            />
           </div>
         </div>
       </section>
@@ -388,14 +392,18 @@ ax url '.review' --like 'battery complaints'`}</pre>
             </span>
           </div>
           <div class='brow'>
-            <span class='desc'>Live website, real internet, decoy markup — median of 3 runs (Opus 4.8)</span>
+            <span class='desc'>
+              Live website, real internet, decoy markup — median of 3 runs (Opus 4.8)
+            </span>
             <span class='delta'>−23% cost</span>
             <span class='nums'>
               without ax <b>$0.248</b> → with ax <b>$0.191</b>
             </span>
           </div>
           <div class='brow'>
-            <span class='desc'>Same drift task, the agent's first-ever use of ax — cost of reading the docs included</span>
+            <span class='desc'>
+              Same drift task, the agent's first-ever use of ax — cost of reading the docs included
+            </span>
             <span class='delta'>−58% cost</span>
             <span class='nums'>
               without ax <b>$0.664</b> → with ax <b>$0.282</b>
@@ -405,8 +413,7 @@ ax url '.review' --like 'battery complaints'`}</pre>
         <p class='note'>
           Measured on real headless agent sessions with the agent already knowing ax (except the
           last row) — the same advantage python gets from its training data. Both sides correct in
-          every run. Full
-          method, every run, variance notes and the losses —{' '}
+          every run. Full method, every run, variance notes and the losses —{' '}
           <a href='https://github.com/yusukebe/ax/blob/main/bench/RESULTS.md'>in the repo</a>.
         </p>
       </section>
