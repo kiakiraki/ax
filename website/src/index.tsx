@@ -154,7 +154,7 @@ document.querySelectorAll('[data-copy]').forEach(function(btn){
 
 const INSTALL_CMD = 'curl -fsSL https://ax.yusuke.run/install | sh'
 const AGENT_PROMPT =
-  'The ax CLI is installed. Run `ax agent-context` to learn it, then use it instead of writing throwaway python/regex scripts.'
+  'ax is installed. Run `ax agent-context` to learn it — use it instead of throwaway scripts.'
 
 const Page = () => (
   <html lang='en'>
@@ -212,9 +212,8 @@ const Page = () => (
             extract. One command.
           </h1>
           <p class='sub'>
-            HTTP and HTML for AI agents. Fetch with a structured report, understand a page without
-            dumping it into context, extract clean rows with CSS selectors — one line instead of
-            curl plus a python heredoc. Token-cheap, capped by default, never silent.
+            HTTP and HTML for AI agents. One command instead of curl + a throwaway python script —
+            token-cheap, capped by default, never silent.
           </p>
           <div class='steps'>
             <div class='step'>
@@ -411,9 +410,8 @@ ax url '.review' --like 'battery complaints'`}</pre>
           </div>
         </div>
         <p class='note'>
-          Measured on real headless agent sessions with the agent already knowing ax (except the
-          last row) — the same advantage python gets from its training data. Both sides correct in
-          every run. Full method, every run, variance notes and the losses —{' '}
+          Real headless agent sessions, agent already knowing ax (except the last row). Both sides
+          correct in every run. Full method, variance notes and the losses —{' '}
           <a href='https://github.com/yusukebe/ax/blob/main/bench/RESULTS.md'>in the repo</a>.
         </p>
       </section>
@@ -422,11 +420,8 @@ ax url '.review' --like 'battery complaints'`}</pre>
         <h2>Built for agents, not just humans.</h2>
         <div class='cols'>
           <p>
-            Output is capped by default (never silently). Errors are one structured line with a
-            hint.
-            <code> --help</code> costs a few dozen tokens, and <code>ax agent-context</code> prints
-            everything an agent needs to know — offline. Paste the prompt to teach your agent for
-            the current session, or install the skill to make it stick.
+            <code>ax agent-context</code> prints the full manual, offline. Paste the prompt for one
+            session, or install the skill to make it stick.
           </p>
           <div class='steps'>
             <div class='step'>
