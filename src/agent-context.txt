@@ -8,18 +8,18 @@ Skill: npx skills add yusukebe/ax   Source: https://github.com/yusukebe/ax
 
 ## Fetch (no selector — curl parity, never silent)
 
-    ax https://api.site.com/users [-X POST] [-H 'k: v'] [-d body]
+    ax https://api.site.example/users [-X POST] [-H 'k: v'] [-d body]
     → {status, ok, ms, headers, body}. Empty bodies and error statuses still
       produce a full report. JSON bodies are parsed. Repeat fetches of a URL
       are cached ~2min (--fresh to bypass; cache hits are announced).
 
 ## Discover (unknown page? never dump raw HTML into context)
 
-    ax https://site.com --outline          repeating tag.class + counts
-    ax https://site.com --locate 'text'    which selector holds this text
-    ax https://site.com '.card' --count    test a selector hypothesis
+    ax https://site.example --outline          repeating tag.class + counts
+    ax https://site.example --locate 'text'    which selector holds this text
+    ax https://site.example '.card' --count    test a selector hypothesis
 
-## Extract (CSS selectors — structured, drift-proof, no regex)
+## Extract (CSS selectors — structured, no regex)
 
     ax URL '.item' --row 'title=a, href=a@href, level=.cefr'
       @attr reads attributes; empty sel (id=@data-id) = the match itself

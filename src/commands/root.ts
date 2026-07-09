@@ -20,7 +20,7 @@ discover (unknown page? never dump raw HTML):
   --locate <text>    which selector holds this text (matches attributes too)
   --count            how many elements match <selector>
 
-extract (selector — CSS, structured, drift-proof):
+extract (selector — CSS, structured):
   --row 'title=a, href=a@href, level=.cefr'   structured rows (@attr reads
                                               attributes; empty sel = the match)
   --table            <table> → rows keyed by headers
@@ -34,11 +34,11 @@ output shape (token-cheap by design):
   --budget <t>       cap output at ~t tokens; truncation is never silent
 
 examples:
-  ax https://news.ycombinator.com '.titleline > a' --row 'title=, href=@href'
-  ax https://site.com --outline
-  ax https://docs.site.com/guide --md --budget 800
+  ax https://site.example '.item > a' --row 'title=, href=@href'
+  ax https://site.example --outline
+  ax https://docs.site.example/guide --md --budget 800
   ax page.html 'table.stats' --table --where 'Stars >= 30000'
-  ax https://api.site.com/things -H 'authorization: Bearer x'`
+  ax https://api.site.example/things -H 'authorization: Bearer x'`
 
 type Field = { name: string; sel: string; attr: string | null }
 

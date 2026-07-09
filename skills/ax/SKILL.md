@@ -11,14 +11,14 @@ HTML, and never use bare curl (it returns nothing on empty bodies).
 ## Cheatsheet
 
 ```sh
-ax https://api.site.com/users                    # {status, ok, ms, headers, body} — never silent
-ax https://api.site.com/users -H 'authorization: Bearer x' -X POST -d '{"a":1}'
-ax https://site.com --outline                    # discover: repeating structures
-ax https://site.com --locate 'some text'         # discover: which selector holds this
-ax https://site.com '.card' --count              # confirm a hypothesis
-ax https://site.com '.card' --row 'title=a, href=a@href, id=@data-id'
-ax https://site.com 'table' --table --where 'Stars >= 30000'
-ax https://docs.site.com/guide --md --budget 800 # read docs as markdown
+ax https://api.site.example/users                    # {status, ok, ms, headers, body} — never silent
+ax https://api.site.example/users -H 'authorization: Bearer x' -X POST -d '{"a":1}'
+ax https://site.example --outline                    # discover: repeating structures
+ax https://site.example --locate 'some text'         # discover: which selector holds this
+ax https://site.example '.card' --count              # confirm a hypothesis
+ax https://site.example '.card' --row 'title=a, href=a@href, id=@data-id'
+ax https://site.example 'table' --table --where 'Stars >= 30000'
+ax https://docs.site.example/guide --md --budget 800 # read docs as markdown
 ```
 
 The workflow: fetch/--outline once → --locate/--count to confirm → ONE

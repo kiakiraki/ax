@@ -1,7 +1,17 @@
 # ax benchmark results
 
+**How to read this file**: it is a chronological, unedited lab log — losses,
+dead ends and variance warnings included. Early sections benchmark the
+multi-tool era of ax (`ax html/json/text/stats` subcommands, `--like`); those
+commands now live on the [`toolkit`](https://github.com/yusukebe/ax/tree/toolkit)
+and [`like`](https://github.com/yusukebe/ax/tree/like) branches, not on main.
+Everything from "Single-command ax" onward benchmarks the current
+single-command ax.
+The numbers on [the website](https://ax.yusuke.run) come from the
+tool-warm suite at the bottom.
+
 Method: the same task is given to two real headless Claude Code sessions
-(`claude -p`, model claude-fable-5, tools Bash/Read/Grep/Glob).
+(`claude -p`, model claude-fable-5 unless stated, tools Bash/Read/Grep/Glob).
 
 - **A (baseline)**: no knowledge of ax.
 - **B (ax)**: the ax skill is in context (as it would be after `npx skills add`).
