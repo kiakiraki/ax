@@ -242,11 +242,11 @@ const Page = () => (
             <pre
               dangerouslySetInnerHTML={{
                 __html: `<span class="c"># what's on this page?</span>
-<span class="p">$</span> ax https://shop.com --outline
+<span class="p">$</span> ax https://shop.example --outline
    80  .prod
 <span class="c"># pull it out, structured</span>
-<span class="p">$</span> ax https://shop.com '.prod' \\
-    --row 'name=h3, price=.price'
+<span class="p">$</span> ax https://shop.example '.prod' \\
+  --row 'name=h3, price=.price'
 name        price
 Desk Lamp   $29
 Mug         $12
@@ -269,7 +269,7 @@ Mug         $12
             <div class='tag'>after — one ax command</div>
             <pre
               dangerouslySetInnerHTML={{
-                __html: `ax https://site.com '.lesson' \\
+                __html: `ax https://site.example '.lesson' \\
   --row 'title=a, href=a@href, level=.cefr'
 
 title        href            level
@@ -293,7 +293,7 @@ Directions   /lesson/2.htm   A2
               curl-like fetching for agent workflows: every request yields a structured report
               instead of silent failure.
             </p>
-            <pre>{`ax https://api.site.com/users
+            <pre>{`ax https://api.site.example/users
 → { "status": 200, "ok": true,
     "ms": 84, "headers": {...},
     "body": [...] }`}</pre>
@@ -302,10 +302,10 @@ Directions   /lesson/2.htm   A2
             <div class='num'>02</div>
             <h3>discover</h3>
             <p>Understand an unknown page without dumping raw HTML into context.</p>
-            <pre>{`ax https://site.com --outline
+            <pre>{`ax https://site.example --outline
    50  div.lesson
-ax https://site.com --locate 'text'
-ax https://site.com '.card' --count`}</pre>
+ax https://site.example --locate 'text'
+ax https://site.example '.card' --count`}</pre>
           </article>
           <article>
             <div class='num'>03</div>
