@@ -51,7 +51,11 @@ box-shadow:0 6px 0 var(--shadow);overflow:hidden}
 h1{font-size:clamp(34px,6.6vw,64px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin:0 0 22px;max-width:640px}
 .mark{background:var(--acc);color:#fff;padding:.02em .3em;border-radius:14px;display:inline-block;transform:rotate(-2deg)}
 .strike{text-decoration:line-through;text-decoration-thickness:4px;text-decoration-color:var(--acc);color:var(--soft)}
-.sub{font-size:16.5px;max-width:540px;color:#6b5a4c;margin:0 0 32px}
+.sub{font-size:16.5px;max-width:540px;color:#6b5a4c;margin:0 0 14px}
+.fineprint{font-size:12.5px;color:var(--soft);max-width:540px;margin:0 0 28px}
+.selflearn{font-size:12.5px;color:var(--soft);margin:14px 0 0}
+.selflearn code{background:var(--acc-soft);border-radius:6px;padding:1px 6px;color:#c2410c}
+.scope{font-size:13px;color:var(--soft);margin:-14px 0 22px}
 .steps{display:flex;flex-direction:column;gap:12px;max-width:660px}
 .step{display:flex;align-items:center;gap:14px;background:var(--card);border:2px solid var(--line);
 border-radius:16px;padding:12px 16px;box-shadow:0 5px 0 var(--shadow)}
@@ -212,8 +216,12 @@ const Page = () => (
             extract. One command.
           </h1>
           <p class='sub'>
-            HTTP and HTML for AI agents. One command instead of curl + a throwaway python script —
-            token-cheap, capped by default, never silent.
+            Local HTTP and HTML I/O for coding agents. One command instead of curl + throwaway
+            Python — structured, token-cheap, capped by default, never silent.
+          </p>
+          <p class='fineprint'>
+            Not a full curl replacement — just the web-reading agents repeat all day: fetch,
+            inspect, locate, extract, bound output.
           </p>
           <div class='steps'>
             <div class='step'>
@@ -229,6 +237,9 @@ const Page = () => (
               <button data-copy={AGENT_PROMPT}>copy</button>
             </div>
           </div>
+          <p class='selflearn'>
+            Agents self-learn the CLI offline with <code>ax agent-context</code>.
+          </p>
         </div>
         <div class='hero-art'>
           <div class='mascot'>🪓</div>
@@ -256,14 +267,14 @@ Directions   A2
       </div>
 
       <section>
-        <h2>Agents keep writing this.</h2>
+        <h2>Coding agents keep writing this.</h2>
         <div class='duel'>
           <div class='pane bad'>
-            <div class='tag'>before — one real session: 3m 19s · 8.6k tokens</div>
+            <div class='tag'>before — real agent session: 3m 19s · 8.6k tokens</div>
             <pre>{duelBefore}</pre>
           </div>
           <div class='pane'>
-            <div class='tag'>after — one line</div>
+            <div class='tag'>after — one ax command</div>
             <pre
               dangerouslySetInnerHTML={{
                 __html: `ax https://site.com '.lesson' \\
@@ -286,7 +297,10 @@ Directions   /lesson/2.htm   A2
           <article>
             <div class='num'>01</div>
             <h3>fetch</h3>
-            <p>curl parity, but never silent: every request yields a full structured report.</p>
+            <p>
+              curl-like fetching for agent workflows: every request yields a structured report
+              instead of silent failure.
+            </p>
             <pre>{`ax https://api.site.com/users
 → { "status": 200, "ok": true,
     "ms": 84, "headers": {...},
@@ -304,7 +318,10 @@ ax https://site.com '.card' --count`}</pre>
           <article>
             <div class='num'>03</div>
             <h3>extract</h3>
-            <p>CSS selectors → structured rows. Drift-proof where regex breaks.</p>
+            <p>
+              CSS selectors → structured rows. Easier for agents to repair than regex when markup
+              changes.
+            </p>
             <pre>{`ax url '.item' --row 'title=a, href=a@href'
 ax url 'table' --table --where 'Stars > 100'
 ax url --md --budget 800   # docs as markdown
@@ -314,7 +331,11 @@ ax url '.review' --like 'battery complaints'`}</pre>
       </section>
 
       <section class='vs'>
-        <h2>Versus the usual suspects.</h2>
+        <h2>Versus the usual local fallback.</h2>
+        <p class='scope'>
+          What agents reach for inside a coding session: python snippets, htmlq-style selector
+          tools, and ax.
+        </p>
         <div class='rows'>
           <div class='vrow head'>
             <span></span>
@@ -341,7 +362,7 @@ ax url '.review' --like 'battery complaints'`}</pre>
             <span class='m ok'>✓</span>
           </div>
           <div class='vrow'>
-            <span>survives markup drift</span>
+            <span>easier selector repair after markup drift</span>
             <span class='m no'>✗</span>
             <span class='m ok'>✓</span>
             <span class='m ok'>✓</span>
@@ -372,7 +393,7 @@ ax url '.review' --like 'battery complaints'`}</pre>
       </section>
 
       <section class='bench'>
-        <h2>Benchmarked, honestly.</h2>
+        <h2>Benchmarked on real agent sessions.</h2>
         <div class='rows'>
           <div class='brow'>
             <span class='desc'>
@@ -410,8 +431,8 @@ ax url '.review' --like 'battery complaints'`}</pre>
           </div>
         </div>
         <p class='note'>
-          Real headless agent sessions, agent already knowing ax (except the last row). Both sides
-          correct in every run. Full method, variance notes and the losses —{' '}
+          Agent already knowing ax (except the last row). Both sides correct in every run. Method,
+          prompts, variance notes and the failed runs —{' '}
           <a href='https://github.com/yusukebe/ax/blob/main/bench/RESULTS.md'>in the repo</a>.
         </p>
       </section>
