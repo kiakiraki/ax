@@ -381,7 +381,21 @@ ax url '.review' --like 'battery complaints'`}</pre>
             </span>
           </div>
           <div class='brow'>
-            <span class='desc'>Same task, the agent's first-ever use of ax — cost of reading the docs included</span>
+            <span class='desc'>Structured extraction from a 60-item catalog page (Opus 4.8)</span>
+            <span class='delta'>−65% cost</span>
+            <span class='nums'>
+              without ax <b>$0.296</b> / 24s → with ax <b>$0.104</b> / 14s
+            </span>
+          </div>
+          <div class='brow'>
+            <span class='desc'>Live website, real internet, decoy markup — median of 3 runs (Opus 4.8)</span>
+            <span class='delta'>−23% cost</span>
+            <span class='nums'>
+              without ax <b>$0.248</b> → with ax <b>$0.191</b>
+            </span>
+          </div>
+          <div class='brow'>
+            <span class='desc'>Same drift task, the agent's first-ever use of ax — cost of reading the docs included</span>
             <span class='delta'>−58% cost</span>
             <span class='nums'>
               without ax <b>$0.664</b> → with ax <b>$0.282</b>
@@ -389,8 +403,9 @@ ax url '.review' --like 'battery complaints'`}</pre>
           </div>
         </div>
         <p class='note'>
-          Measured on real headless agent sessions with the agent already knowing ax — the same
-          advantage python gets from its training data. Both sides correct in every run. Full
+          Measured on real headless agent sessions with the agent already knowing ax (except the
+          last row) — the same advantage python gets from its training data. Both sides correct in
+          every run. Full
           method, every run, variance notes and the losses —{' '}
           <a href='https://github.com/yusukebe/ax/blob/main/bench/RESULTS.md'>in the repo</a>.
         </p>

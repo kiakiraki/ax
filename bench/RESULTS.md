@@ -231,3 +231,27 @@ The agent again cited the row-stats line as its verification.
 
 Single warm runs swing hard. Before presenting a uniform "agent knows ax"
 table, run n≥3 per cell and average. Kept here so we don't fool ourselves.
+
+### Tool-warm suite, expanded (Opus, neutral warmup, all answers verified)
+
+Clean extraction (b2-lessons fixture, 60 B2 lessons):
+
+|               | python (tool-native)   | ax (tool-warm)                          |
+| ------------- | ---------------------- | --------------------------------------- |
+| clean extract | $0.296 / 23.9s / 3t    | **$0.104 / 13.8s / 3t (−65% cost)**     |
+
+Live web (elllo.org, real internet, 50 lessons + decoy divs), n=3:
+
+| sample     | python           | ax                                        |
+| ---------- | ---------------- | ----------------------------------------- |
+| 1          | **$0.248 / 34s** | $0.464 (generic-selector spree; recorded) |
+| 2          | $0.264 / 45s     | **$0.191 / 36s (−28%)**                   |
+| 3          | $0.189 / 32s     | $0.190 / 35s (tie)                        |
+| **median** | $0.248           | **$0.191 (−23%)**                         |
+
+All six runs answered correctly (50 lessons, mobilelist selector, correct
+first-three hrefs). Live web is the noisiest arena: ax wins the median but
+one sample lost outright. Reported as median-of-3, loss included.
+
+**Tool-warm scoreboard (Opus, all verified correct):** drift −67%, clean
+extract −65%, live web −23% (median of 3). These are the site numbers.
