@@ -8,3 +8,4 @@ website/src/og.png
 bench/*.html
 bench/*.json
 bench/*.log
+website/.wrangler/
