@@ -1,6 +1,14 @@
 import { parseHTML } from 'linkedom'
 import { parseArgs, num } from '../lib/args'
-import { readSource, fail } from '../lib/io'
+import {
+  readSource,
+  fail,
+  guardsFromFlags,
+  readBodyCapped,
+  readWithDeadline,
+  timeoutError,
+  type CappedBody,
+} from '../lib/io'
 import { emitLines, emitJson } from '../lib/emit'
 import { compileWhere } from '../lib/expr'
 import { toTsv } from '../lib/query'
@@ -14,14 +22,21 @@ fetch (no selector — curl parity, but never silent):
   ax https://api.example.com/users        {status, ok, ms, headers, body}
   -X, --method <m>   -H, --header <k: v>   -d, --data <body>
   curl reflexes work: -u user:pass  -I (HEAD)  -o <file>  -k  -m <secs>
-  --data-raw/--data-binary; -L -i -s -S -f --compressed are accepted no-ops
-  JSON bodies are parsed; repeat fetches of one URL are cached ~2min (--fresh)
+  -f (HTTP errors -> exit 22, report still printed)  --data-raw/--data-binary
+  -L -i -s -S --compressed are accepted no-ops
+  --body             body only on stdout, uncapped (notes on stderr; for pipes)
+  JSON bodies are parsed; fetch mode never caches — every request is live
   noisy response headers are omitted (announced; --headers shows all)
+  downloads stop at 20MB / 30s by default (--max-bytes <n>, -m <secs>; capped
+  reads are always announced, never silent)
 
 discover (unknown page? never dump raw HTML):
   --outline          repeating tag.class signatures with counts
   --locate <text>    which selector holds this text (matches attributes too)
   --count            how many elements match <selector>
+  parse-mode URLs are cached ~2min so probing is free (hits announced;
+  --fresh = refetch then re-cache, --no-cache = never touch the disk;
+  Cache-Control: no-store and credential-bearing URLs are never cached)
 
 extract (selector — CSS, structured):
   --row 'title=a, href=a@href, level=.cefr'   structured rows (@attr reads
@@ -172,6 +187,7 @@ export async function root(argv: string[]) {
   const { _, flags } = parseArgs(argv, {
     help: { type: 'boolean' },
     fresh: { type: 'boolean' },
+    'no-cache': { type: 'boolean' },
     headers: { type: 'boolean' },
     all: { type: 'boolean' },
     text: { type: 'boolean' },
@@ -197,14 +213,16 @@ export async function root(argv: string[]) {
     output: { type: 'string', short: 'o' },
     insecure: { type: 'boolean', short: 'k' },
     'max-time': { type: 'string', short: 'm' },
+    'max-bytes': { type: 'string' },
     'data-raw': { type: 'string' },
     'data-binary': { type: 'string' },
+    fail: { type: 'boolean', short: 'f' },
+    body: { type: 'boolean' },
     // accepted no-ops (ax always behaves this way):
     location: { type: 'boolean', short: 'L' },
     include: { type: 'boolean', short: 'i' },
     silent: { type: 'boolean', short: 's' },
     'show-error': { type: 'boolean', short: 'S' },
-    fail: { type: 'boolean', short: 'f' },
     compressed: { type: 'boolean' },
   })
   if (flags.help || _.length === 0) return console.log(rootHelp)
@@ -245,8 +263,8 @@ export async function root(argv: string[]) {
           : data !== undefined
             ? 'POST'
             : 'GET'
-    const timeoutMs =
-      typeof flags['max-time'] === 'string' ? Number(flags['max-time']) * 1000 : undefined
+    const guards = guardsFromFlags(flags)
+    const deadline = Date.now() + guards.timeoutMs
     const started = performance.now()
     let res: Response
     try {
@@ -254,26 +272,69 @@ export async function root(argv: string[]) {
         method,
         headers,
         body: data,
-        signal: timeoutMs ? AbortSignal.timeout(timeoutMs) : undefined,
+        signal: AbortSignal.timeout(guards.timeoutMs),
         ...(flags.insecure === true ? { tls: { rejectUnauthorized: false } } : {}),
       })
     } catch (e) {
+      timeoutError(e, guards.timeoutMs)
       return fail(`request failed: ${(e as Error).message}`, `is the server running at ${src}?`)
     }
     const ms = Math.round(performance.now() - started)
     if (typeof flags.output === 'string') {
-      const bytes = new Uint8Array(await res.arrayBuffer())
-      await Bun.write(flags.output, bytes)
+      // Stream to disk — never buffer a download in memory. A failed or
+      // timed-out transfer must not leave a partial file behind.
+      const sink = Bun.file(flags.output).writer()
+      let written = 0
+      try {
+        const reader = res.body?.getReader()
+        if (reader) {
+          while (true) {
+            const { done, value } = await readWithDeadline(reader, deadline)
+            if (done || !value) break
+            sink.write(value)
+            written += value.byteLength
+          }
+        }
+        await sink.end()
+      } catch (e) {
+        await Promise.resolve(sink.end()).catch(() => {})
+        await Bun.file(flags.output)
+          .delete()
+          .catch(() => {})
+        timeoutError(e, guards.timeoutMs)
+        return fail(`download failed: ${(e as Error).message} (partial file removed)`)
+      }
       process.stdout.write(
         JSON.stringify(
-          { status: res.status, ok: res.ok, ms, saved: flags.output, bytes: bytes.length },
+          { status: res.status, ok: res.ok, ms, saved: flags.output, bytes: written },
           null,
           2
         ) + '\n'
       )
       process.exit(0)
     }
-    const raw = await res.text()
+    let capped: CappedBody
+    try {
+      capped = await readBodyCapped(res, guards.maxBytes, deadline)
+    } catch (e) {
+      timeoutError(e, guards.timeoutMs)
+      return fail(`read failed: ${(e as Error).message}`)
+    }
+    const raw = new TextDecoder().decode(capped.bytes)
+    // --body: the classic Unix pipe mode — body only on stdout, no display
+    // cap (downloads are still bounded by --max-bytes). Anything unusual is
+    // announced on stderr so the pipe never lies by omission.
+    if (flags.body === true) {
+      if (raw.length > 0) process.stdout.write(raw)
+      if (!res.ok) process.stderr.write(`ax: note: HTTP ${res.status} ${res.statusText}\n`)
+      if (raw.length === 0) process.stderr.write('ax: note: empty body\n')
+      if (capped.capped) {
+        process.stderr.write(
+          `ax: note: download stopped at ${guards.maxBytes} bytes (--max-bytes <n> raises the cap)\n`
+        )
+      }
+      process.exit(flags.fail === true && !res.ok ? 22 : 0)
+    }
     const budgetTokens = flags.all === true ? Infinity : opts.budget > 0 ? opts.budget : 500
     const maxChars = budgetTokens * 4
     const truncated = raw.length > maxChars
@@ -305,6 +366,11 @@ export async function root(argv: string[]) {
           headers: reportHeaders,
           ...(omitted > 0 ? { headers_omitted: `${omitted} (--headers for all)` } : {}),
           body,
+          ...(capped.capped
+            ? {
+                download_capped: `stopped reading at ${guards.maxBytes} bytes (--max-bytes <n> raises the cap)`,
+              }
+            : {}),
           ...(truncated
             ? {
                 body_truncated: `${raw.length - maxChars} of ${raw.length} chars hidden (--all or --budget T)`,
@@ -315,11 +381,18 @@ export async function root(argv: string[]) {
         2
       ) + '\n'
     )
+    // curl parity: -f turns HTTP errors into a failing exit code (curl uses
+    // 22). Unlike curl we still print the full report — the agent needs the
+    // status and body to act, never-silent applies to failures most of all.
+    if (flags.fail === true && !res.ok) {
+      process.stderr.write(`ax: -f: HTTP ${res.status} -> exit 22\n`)
+      process.exit(22)
+    }
     process.exit(0)
   }
 
   // --- parse mode ---
-  const { document } = parseHTML(await readSource(src))
+  const { document } = parseHTML(await readSource(src, guardsFromFlags(flags)))
   const wherePred = typeof flags.where === 'string' ? compileWhere(flags.where) : null
 
   // JS-shell diagnosis: a 200 with an SPA husk is the sneakiest "success".
