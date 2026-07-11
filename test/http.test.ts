@@ -4,6 +4,33 @@ import { join } from 'node:path'
 const ENTRY = join(import.meta.dir, '..', 'src', 'index.ts')
 let server: ReturnType<typeof Bun.serve>
 
+// Shift_JIS bytes for "こんにちは世界" — can't be produced with TextEncoder
+// (UTF-8 only), so the raw bytes are spelled out here.
+const SJIS_KONNICHIWA = new Uint8Array([
+  0x82, 0xb1, 0x82, 0xf1, 0x82, 0xc9, 0x82, 0xbf, 0x82, 0xcd, 0x90, 0xa2, 0x8a, 0x45,
+])
+const ascii = (s: string) => Uint8Array.from(s.split('').map((c) => c.charCodeAt(0)))
+const concatBytes = (parts: Uint8Array[]) => {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0))
+  let off = 0
+  for (const p of parts) {
+    out.set(p, off)
+    off += p.length
+  }
+  return out
+}
+const SJIS_HEADER_BODY = concatBytes([
+  ascii('<html><head></head><body><p class="msg">'),
+  SJIS_KONNICHIWA,
+  ascii('</p></body></html>'),
+])
+const SJIS_META_BODY = concatBytes([
+  ascii('<html><head><meta charset="shift_jis"></head><body><p class="msg">'),
+  SJIS_KONNICHIWA,
+  ascii('</p></body></html>'),
+])
+const BAD_CHARSET_BODY = ascii('<html><head></head><body><p class="msg">hello</p></body></html>')
+
 // Async spawn: spawnSync would block the event loop that Bun.serve needs to
 // answer the child's request — a deadlock.
 async function ax(args: string[]) {
@@ -41,6 +68,16 @@ beforeAll(() => {
           })
         )
       }
+      if (url.pathname === '/sjis-header')
+        return new Response(SJIS_HEADER_BODY, {
+          headers: { 'content-type': 'text/html; charset=Shift_JIS' },
+        })
+      if (url.pathname === '/sjis-meta')
+        return new Response(SJIS_META_BODY, { headers: { 'content-type': 'text/html' } })
+      if (url.pathname === '/bad-charset')
+        return new Response(BAD_CHARSET_BODY, {
+          headers: { 'content-type': 'text/html; charset=bogus' },
+        })
       if (url.pathname === '/stall') {
         // Sends one chunk, then never finishes.
         return new Response(
@@ -169,4 +206,24 @@ test('--body: body only on stdout, uncapped, notes on stderr', async () => {
   expect(empty.err).toContain('empty body')
   const failed = await ax([`http://localhost:${server.port}/nope`, '--body', '-f'])
   expect(failed.code).toBe(22)
+})
+
+test('charset: Content-Type charset decodes Shift_JIS (fetch and parse mode)', async () => {
+  const url = `http://localhost:${server.port}/sjis-header`
+  const fetchRep = JSON.parse((await ax([url])).out)
+  expect(fetchRep.body).toContain('こんにちは世界')
+  const parsed = await ax([url, '.msg', '--fresh'])
+  expect(parsed.out).toBe('こんにちは世界')
+})
+
+test('charset: <meta charset> is sniffed when the header has none', async () => {
+  const r = await ax([`http://localhost:${server.port}/sjis-meta`, '.msg', '--fresh'])
+  expect(r.out).toBe('こんにちは世界')
+})
+
+test('charset: unknown label falls back to UTF-8 with a stderr note', async () => {
+  const r = await ax([`http://localhost:${server.port}/bad-charset`])
+  const rep = JSON.parse(r.out)
+  expect(rep.body).toContain('hello')
+  expect(r.err).toContain('unknown charset "bogus"')
 })
