@@ -396,3 +396,24 @@ test('-o: a failed download leaves the existing file untouched, no tmp debris', 
   const { readdirSync } = await import('node:fs')
   expect(readdirSync(dataDir).filter((n) => n.includes('.axtmp-'))).toEqual([])
 }, 15000)
+
+test('guard: -o + --max-bytes stops the download, leaves no file, existing file untouched', async () => {
+  const out = join(dataDir, 'capped.bin')
+  await Bun.file(out).write('OLD-CONTENT')
+  const r = await ax([`http://localhost:${server.port}/endless`, '-o', out, '--max-bytes', '10000'])
+  expect(r.code).toBe(1)
+  expect(r.err).toContain('max-bytes')
+  expect(r.err).toContain('10000')
+  expect(await Bun.file(out).text()).toBe('OLD-CONTENT')
+  const { readdirSync } = await import('node:fs')
+  expect(readdirSync(dataDir).filter((n) => n.includes('.axtmp-'))).toEqual([])
+})
+
+test('guard: -o into a nonexistent directory fails cleanly, no raw stack trace', async () => {
+  const out = '/nonexistent-dir-xyz/out.txt'
+  const r = await ax([`http://localhost:${server.port}/json`, '-o', out])
+  expect(r.code).not.toBe(0)
+  expect(r.err.split('\n').length).toBe(1)
+  expect(r.err).toContain('cannot write to')
+  expect(r.err).not.toContain('at root (')
+})
