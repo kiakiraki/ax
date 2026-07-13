@@ -370,7 +370,12 @@ export async function root(argv: string[]) {
       // rename means a failed or timed-out transfer leaves whatever sat at
       // -o before completely untouched — no partials, no franken-files.
       const tmpOut = `${flags.output}.axtmp-${process.pid}`
-      const sink = Bun.file(tmpOut).writer()
+      let sink: Bun.FileSink
+      try {
+        sink = Bun.file(tmpOut).writer()
+      } catch (e) {
+        return fail(`cannot write to ${flags.output}: ${(e as Error).message}`)
+      }
       let written = 0
       try {
         const reader = res.body?.getReader()
@@ -378,6 +383,16 @@ export async function root(argv: string[]) {
           while (true) {
             const { done, value } = await readWithDeadline(reader, deadline)
             if (done || !value) break
+            if (value.byteLength >= guards.maxBytes - written) {
+              await reader.cancel().catch(() => {})
+              await Promise.resolve(sink.end()).catch(() => {})
+              await Bun.file(tmpOut)
+                .delete()
+                .catch(() => {})
+              return fail(
+                `download exceeded --max-bytes at ${guards.maxBytes} bytes (--max-bytes <n> raises the cap; existing file at ${flags.output} untouched)`
+              )
+            }
             sink.write(value)
             written += value.byteLength
           }
