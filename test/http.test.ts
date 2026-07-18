@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os'
 const ENTRY = join(import.meta.dir, '..', 'src', 'index.ts')
 let server: ReturnType<typeof Bun.serve>
 let dataDir: string
+let parseEchoHits = 0
 
 // Shift_JIS bytes for "こんにちは世界" — can't be produced with TextEncoder
 // (UTF-8 only), so the raw bytes are spelled out here.
@@ -108,6 +109,18 @@ beforeAll(() => {
         )
       if (url.pathname === '/echo-bytes')
         return req.arrayBuffer().then((bytes) => new Response(bytes))
+      if (url.pathname === '/parse-echo') {
+        parseEchoHits++
+        return req
+          .text()
+          .then(
+            (body) =>
+              new Response(
+                `<html><body><p class="method">${req.method}</p><p class="body">${body}</p></body></html>`,
+                { headers: { 'content-type': 'text/html' } }
+              )
+          )
+      }
       if (url.pathname === '/auth') return new Response(req.headers.get('authorization') ?? 'none')
       if (url.pathname === '/header-page') {
         if (req.headers.get('x-api-key') !== 'parse-secret')
@@ -357,6 +370,87 @@ test('parse mode forwards basic auth', async () => {
   const r = await ax([`http://localhost:${server.port}/basic-page`, '.secret', '-u', 'user:pass'])
   expect(r.code).toBe(0)
   expect(r.out).toBe('basic access')
+})
+
+test('parse mode forwards -X: method reaches the server and the page still parses', async () => {
+  const r = await ax([`http://localhost:${server.port}/parse-echo`, '.method', '-X', 'POST'])
+  expect(r.code).toBe(0)
+  expect(r.out).toBe('POST')
+})
+
+test('parse mode forwards -d: body reaches the server and implies POST', async () => {
+  const url = `http://localhost:${server.port}/parse-echo`
+  const body = await ax([url, '.body', '-d', 'hello'])
+  expect(body.code).toBe(0)
+  expect(body.out).toBe('hello')
+  const method = await ax([url, '.method', '-d', 'hello'])
+  expect(method.out).toBe('POST')
+})
+
+test('parse mode: -d requests bypass the URL cache', async () => {
+  const url = `http://localhost:${server.port}/parse-echo`
+  const before = parseEchoHits
+  const first = await ax([url, '.body', '-d', 'x'])
+  const second = await ax([url, '.body', '-d', 'x'])
+  expect(first.err).not.toContain('cached fetch')
+  expect(second.err).not.toContain('cached fetch')
+  expect(parseEchoHits - before).toBe(2)
+})
+
+test('parse mode + -I: falls back to GET with a note, never parses an empty HEAD body', async () => {
+  const url = `http://localhost:${server.port}/parse-echo?variant=head`
+  const r = await ax([url, '.method', '-I'])
+  expect(r.code).toBe(0)
+  expect(r.out).toBe('GET')
+  expect(r.err).toContain('ax: note: HEAD has no body to parse — treating as GET')
+})
+
+test('parse mode: -I with -d fails pointing at -I, not at a -X the user never typed', async () => {
+  const url = `http://localhost:${server.port}/parse-echo?variant=head-with-body`
+  const r = await ax([url, '.method', '-I', '-d', 'x'])
+  expect(r.code).toBe(1)
+  expect(r.err).toContain('cannot be sent with HEAD')
+  expect(r.err).toContain('drop -I')
+  expect(r.err).not.toContain('drop -X')
+})
+
+test('parse mode: request flags on a local file are announced, not silently dropped', async () => {
+  const file = join(dataDir, 'local-page.html')
+  await Bun.file(file).write('<html><body><p class="x">local</p></body></html>')
+  const r = await ax([file, '.x', '-X', 'POST', '-d', 'ignored'])
+  expect(r.code).toBe(0)
+  expect(r.out).toBe('local')
+  expect(r.err).toContain('ax: note: -X/-d ignored')
+  const clean = await ax([file, '.x'])
+  expect(clean.err).not.toContain('ignored')
+})
+
+test('parse mode: -d with -X GET is a structured error, not a raw TypeError', async () => {
+  const url = `http://localhost:${server.port}/parse-echo?variant=get-with-body`
+  const r = await ax([url, '.method', '-d', 'x', '-X', 'GET'])
+  expect(r.code).toBe(1)
+  expect(r.err).toContain('ax: error:')
+  expect(r.err).toContain('cannot be sent with GET')
+})
+
+test('-k: cache reads are still allowed (a plain fetch can be served back to a -k request)', async () => {
+  const url = `http://localhost:${server.port}/parse-echo?variant=k-read`
+  const seeded = await ax([url, '.method', '--fresh'])
+  expect(seeded.out).toBe('GET')
+  const viaInsecure = await ax([url, '.method', '-k'])
+  expect(viaInsecure.out).toBe('GET')
+  expect(viaInsecure.err).toContain('cached fetch')
+})
+
+test('-k: cache writes are skipped — repeated -k requests both hit the server', async () => {
+  const url = `http://localhost:${server.port}/parse-echo?variant=k-write`
+  const before = parseEchoHits
+  const first = await ax([url, '.method', '-k'])
+  const second = await ax([url, '.method', '-k'])
+  expect(first.out).toBe('GET')
+  expect(second.out).toBe('GET')
+  expect(second.err).not.toContain('cached fetch')
+  expect(parseEchoHits - before).toBe(2)
 })
 
 test('curl reflexes: no-op flags accepted silently, -o saves body', async () => {
