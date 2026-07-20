@@ -185,51 +185,69 @@ function selectorPath(el: Element): string {
   return parts.join(' > ')
 }
 
-// Elements whose text (and descendants) never belong in readable output —
-// page chrome, form widgets, and content browsers don't render (template,
-// media fallback text).
-const SKIP_TAGS = new Set([
+// Tag semantics for --md, built from disjoint tiers: each tag is listed
+// exactly once, and the subset relations (zero-footprint ⊂ invisible ⊂
+// skip, structured ⊂ block) hold by construction.
+
+// display:none in a real browser — dropped without leaving a gap on
+// screen, so no separating space either.
+const ZERO_FOOTPRINT_TAGS = new Set([
   'script',
   'style',
-  'nav',
-  'header',
-  'footer',
-  'aside',
   'noscript',
-  'svg',
-  'form',
+  'template',
   'head',
   'title',
-  'select',
-  'option',
-  'textarea',
   'datalist',
-  'button',
-  'template',
+  'option',
+])
+// Occupy space on screen but render no text usable as content or a link
+// label: replaced/embedded content, plus form fields whose text (option
+// lists, typed values) never reads as prose. Dropping one leaves a space.
+const REPLACED_TAGS = new Set([
+  'svg',
+  'select',
+  'textarea',
   'video',
   'audio',
   'object',
   'canvas',
   'iframe',
 ])
-// Block-level elements per HTML's default display; everything else —
-// including unknown/custom tags — defaults to inline, matching browsers.
-const BLOCK_TAGS = new Set([
+// Page chrome and widgets whose text is visible on screen but isn't
+// content: dropped from flowing prose, still usable as a link's label.
+const WIDGET_TAGS = new Set(['nav', 'header', 'footer', 'aside', 'form', 'button'])
+
+// Never renders visible text in a browser — excluded from link-label rescue.
+const INVISIBLE_TAGS = new Set([...ZERO_FOOTPRINT_TAGS, ...REPLACED_TAGS])
+// Elements whose text (and descendants) never belong in readable output.
+const SKIP_TAGS = new Set([...INVISIBLE_TAGS, ...WIDGET_TAGS])
+
+// Structure markdown can't express inside a link label. A block-promoted
+// <a href> wrapping none of these flattens to [text](url) so the href
+// survives; one wrapping any of them recurses as blocks instead, trading
+// the href for the structure.
+const STRUCTURED_TAGS = new Set([
   'h1',
   'h2',
   'h3',
   'h4',
   'h5',
   'h6',
-  'p',
-  'li',
-  'blockquote',
   'pre',
   'table',
-  'div',
+  'blockquote',
   'ul',
   'ol',
   'dl',
+])
+// Block-level elements per HTML's default display; everything else —
+// including unknown/custom tags — defaults to inline, matching browsers.
+const BLOCK_TAGS = new Set([
+  ...STRUCTURED_TAGS,
+  'p',
+  'li',
+  'div',
   'dt',
   'dd',
   'section',
@@ -247,6 +265,15 @@ const BLOCK_TAGS = new Set([
   'menu',
   'center',
 ])
+
+// Exported for the tag-tier invariant test.
+export const MD_TAG_TIERS = {
+  zeroFootprint: ZERO_FOOTPRINT_TAGS,
+  replaced: REPLACED_TAGS,
+  widget: WIDGET_TAGS,
+  structured: STRUCTURED_TAGS,
+  block: BLOCK_TAGS,
+}
 
 // Does el contain a descendant whose tag is in `tags`? SKIP_TAGS subtrees
 // are pruned so hidden markup (a <p> inside <noscript>, form internals)
@@ -274,61 +301,10 @@ function hasDescendantIn(
 const blockDescendantCache = new WeakMap<Element, boolean>()
 const hasBlockDescendant = (el: Element) => hasDescendantIn(el, BLOCK_TAGS, blockDescendantCache)
 
-// Structure markdown can't express inside a link label. A block-promoted
-// <a href> wrapping none of these flattens to [text](url) so the href
-// survives; one wrapping any of them recurses as blocks instead, trading
-// the href for the structure.
-const STRUCTURED_TAGS = new Set([
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-  'pre',
-  'table',
-  'blockquote',
-  'ul',
-  'ol',
-  'dl',
-])
 const hasStructuredContent = (el: Element) => hasDescendantIn(el, STRUCTURED_TAGS)
 
-// SKIP_TAGS that are display:none in a real browser — dropping them leaves
-// no gap on screen, so no separating space either. The rest (button, select,
-// media, chrome) occupy space and become one space when dropped.
-const ZERO_FOOTPRINT_TAGS = new Set([
-  'script',
-  'style',
-  'noscript',
-  'template',
-  'head',
-  'title',
-  'datalist',
-  'option',
-])
-
-// The subset of SKIP_TAGS that never renders visible text in a browser. The
-// rest (button, form chrome, …) is dropped from flowing prose but can still
-// serve as a link's label when the link has no other text.
-const INVISIBLE_TAGS = new Set([
-  'script',
-  'style',
-  'noscript',
-  'svg',
-  'head',
-  'title',
-  'select',
-  'option',
-  'textarea',
-  'datalist',
-  'template',
-  'video',
-  'audio',
-  'object',
-  'canvas',
-  'iframe',
-])
+// Text a browser would actually show for el — used to rescue a link label
+// when the normal skip leaves nothing (e.g. <a><button>Buy</button></a>).
 function visibleText(el: Element): string {
   let out = ''
   for (const child of el.childNodes) {
